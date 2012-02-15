@@ -7,12 +7,12 @@ goog.require('goog.events');
 
 /**
  * @param {string|Element|Node|Array|goog.array.ArrayLike} input
- * @param {Element|Node=} mod
+ * @param {string|Element|Node=} mod
  * @return {goog.array.ArrayLike}
  */
 G = function(input, mod) {
     if(goog.isString(mod)) {
-        mod = G.elsBySelector(mod)[0];
+        mod = G.elsBySelector(/** @type {string} */(mod))[0];
     }
     if(input.nodeType)
         input = G([input]);
@@ -31,7 +31,7 @@ G = function(input, mod) {
     }
     if(goog.isArrayLike(input)) {
         input = goog.array.clone(input);
-        input.__proto__ = goog.object.clone([].__proto__);
+        input.__proto__ = function(input){return goog.object.clone([].__proto__)};
         goog.object.extend(input.__proto__, G.prototype);
     }
     /** @type {goog.array.ArrayLike} */
@@ -39,14 +39,18 @@ G = function(input, mod) {
     return ret;
 };
 
+/**
+ * @param {string} input
+ * @param {Element|Node=} mod
+ */
 G.elsBySelector = function(input, mod) {
     if(input.charAt(0) == '.') {
-        return goog.dom.getElementsByClass(input.substring(1), mod) || [];
+        return goog.dom.getElementsByClass(input.substring(1), /** @type {Element} */(mod)) || [];
     }
     if(input.charAt(0) == '#') {
         return [goog.dom.getElement(input)];
     }
-    return goog.dom.getElementsByTagNameAndClass(input.replace(/\s.*/,''), input.replace(/.*\./,'')||null, mod)
+    return goog.dom.getElementsByTagNameAndClass(input.replace(/\s.*/,''), input.replace(/.*\./,'')||null, /** @type {Element} */(mod));
 };
 
 /**

@@ -137,6 +137,67 @@ G.prototype = {
         return G(ret);
     },
     /**
+     * @param {boolean} bool
+     * @return {goog.array.ArrayLike}
+     */
+    visible: function(bool) {
+        return this.each(function(el) {goog.style.showElement(el, bool)});
+    },
+    /**
+     * @return {goog.array.ArrayLike}
+     */
+    show: function() {
+        return this.visible(true);
+    },
+    /**
+     * @return {goog.array.ArrayLike}
+     */
+    hide: function(bool) {
+        return this.visible(false);
+    },
+    /**
+     * @param {string|Object.<string, string>} key
+     * @param {string=} val
+     * @return {goog.array.ArrayLike}
+     */
+    attr: function(key, val) {
+         if(goog.isString(key) && goog.isDef(val)) {
+             var temp = {};
+             goog.object.set(temp, key, val);
+             key = temp;
+         }
+         if(goog.isObject(key)) {
+             this.each(function(el) {
+                 this.setProperties(key);
+             })
+             return this;
+         }
+         return this.map(function(el) {return el.getAttribute(key);});
+    },
+    /**
+     * @oaram {string=} key
+     * @param {string=} val
+     * @return {goog.array.ArrayLike}
+     */
+    data: function(key, val) {
+        return this.attr('data-'+(key||'id'));
+    },
+    /**
+     * @param {string=} val
+     * @return {goog.array.ArrayLike}
+     */
+    val: function(val) {
+        if(goog.isDef(val))
+            return this.each(function(el) {el.value = val;});
+        return this.map(function(el) {return el.value;});
+    },
+    /**
+     * @return {goog.array.ArrayLike}
+     */
+    empty: function(){
+        this.each(goog.dom.removeChildren);
+    },
+    /**
      * @return {goog.array.ArrayLike}
      */
     next: function() {
@@ -147,6 +208,14 @@ G.prototype = {
      */
     prev: function() {
         return this.map(function(el) {return el.previousSibling;});
+    },
+    /**
+     * @param {string=} class
+     * @return {goog.array.ArrayLike}
+     */
+    hasClass: function(class) {
+        return this.filter(function(el) {
+            goog.dom.classes.has(el, class);});
     },
     /**
      * @param {Element|Node|Function|string=} input

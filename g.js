@@ -1,3 +1,7 @@
+/*
+ * Version 0.1
+ */
+
 goog.provide('G');
 
 goog.require('goog.dom');

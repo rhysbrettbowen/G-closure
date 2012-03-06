@@ -232,8 +232,8 @@ G.prototype = {
      * @return {goog.array.ArrayLike}
      */
     hasClass: function(className) {
-        return G(this.filter(function(el) {
-            goog.dom.classes.has(el, className);}));
+        return this.filter(function(el) {
+            goog.dom.classes.has(el, className);});
     },
     /**
      * @param {Element|Node|Function|string=} input
@@ -272,13 +272,12 @@ G.prototype = {
      * @return {goog.array.ArrayLike}
      */
     on: function(eventType, fn, handler, eventObject) {
-        this.each(function(el) {
+        return this.each(function(el) {
             if(eventObject)
                 eventObject.listen(el, eventType, fn, false, (handler || el));
             else
                 goog.events.listen(el, eventType, fn, false, (handler || el));
         });
-        return this;
     },
     /**
      * @param {string} eventType
@@ -288,13 +287,12 @@ G.prototype = {
      * @return {goog.array.ArrayLike}
      */
     off: function(eventType, fn, handler, eventObject) {
-        this.each(function(el) {
+        return this.each(function(el) {
             if(eventObject)
                 eventObject.unlisten(el, eventType, fn, false, (handler || el));
             else
                 goog.events.unlisten(el, eventType, fn, false, (handler || el));
         });
-        return this;
     }, 
     /**
      * @param {Function} fn

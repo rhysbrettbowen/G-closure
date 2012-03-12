@@ -17,6 +17,8 @@ the selector can either be an array, an element or a string. The string should b
 
 the className is optional in the last selector. You can also pass through an element as a second argument to the G object with the above selectors to use as a root node to search from.
 
+If you are using a browser that supports querySelectorAll then G will use that and any valid selector for that browser can be passed.
+
 ## array functions ##
 
 ### .each(function, opt_handler): G ###
@@ -49,11 +51,47 @@ returns the length of G
 
 ### .add(array): G ###
 
-adds an array on to the end of G
+adds an array on to the end of G 
+
+### .contains(obj): Boolean ###
+
+tests if the array contains an object
 
 ## DOM functions ##
 
 these will only work on G objects containing elements
+
+### .top(): Number ###
+
+returns the top offset of the first element
+
+### .top(input): G ###
+
+sets the element.style.top attribute
+
+### .left(): Number ###
+
+returns the left offset of the first element
+
+### .left(input): G ###
+
+sets the element.style.left attribute
+
+### .width(): Number ###
+
+returns the width of the first element
+
+### .width(input): G ###
+
+sets the element.style.width attribute
+
+### .height(): Number ###
+
+returns the height offset of the first element
+
+### .height(input): G ###
+
+sets the element.style.height attribute
 
 ### .find(selector): G ###
 
@@ -107,9 +145,21 @@ return the next sibling of the node
 
 return the previous sibling of the node
 
+### .addClass(string): G ###
+
+adds class to all elements
+
+### .removeClass(string): G ###
+
+removes a class from all elements
+
 ### .hasClass(string): G ###
 
 return a G array of the elements that have the given class
+
+### .append(input): G ###
+
+appends the input to all elements, can be a function, string or Node/NodeList
 
 ### .html(): G ###
 
@@ -131,15 +181,28 @@ sets the textContent of the elements
 
 these are usually used for element arrays, but can also be applied to EventTargets
 
-### .bind(eventType, function, handler, eventObject): G ###
+### .on(eventType, function, handler, eventObject): G ###
 
 takes in the event type (i.e. goog.events.CLICK or "click"), the handling function which takes in the Event, an optional handler to be used as "this" and an optional eventObject (use this with goog.ui.Component and pass in this.getHandler()).
+
+### .off(eventType, function, handler, eventObject): G ###
+
+removes an event registered with on
 
 ### .click(function, handler, eventObject): G ###
 
 the same as bind but the eventType is set to click for you
 
 ## change log ##
+
+### v0.2 ###
+
+- height, width, top, left
+- contains
+- append
+- addClass, removeClass
+- change bind to on and off
+- use querySelectorAll when available
 
 ### v0.1 ###
 

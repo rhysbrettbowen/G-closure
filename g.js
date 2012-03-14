@@ -95,7 +95,7 @@ G.prototype.map = function(fn, handler) {
 };
 /**
  * @param {*} obj
- * @return {Boolean}
+ * @return {boolean}
  */
 G.prototype.contains = function(obj) {
     return goog.array.contains(/** @type {goog.array.ArrayLike} */(this), obj);
@@ -146,7 +146,7 @@ G.prototype.top = function(input) {
         this.each(function(el) {el.style.top = input});
         return this;
     }
-    return goog.style.getBorderBox(this.get(0)).y;
+    return goog.style.getBounds(/** @type {Element} */(this.get(0))).top;
 }
 /**
  * @param {string} input
@@ -159,7 +159,7 @@ G.prototype.left = function(input) {
         this.each(function(el) {el.style.left = input});
         return this;
     }
-    return goog.style.getBorderBox(this.get(0)).x;
+    return goog.style.getBounds(/** @type {Element} */(this.get(0))).left;
 }
 /**
  * @param {string} input
@@ -172,7 +172,7 @@ G.prototype.width = function(input) {
         this.each(function(el) {el.style.width = input});
         return this;
     }
-    return goog.style.getBorderBox(this.get(0)).w;
+    return goog.style.getBounds(/** @type {Element} */(this.get(0))).width;
 }
 /**
  * @param {string} input
@@ -185,7 +185,7 @@ G.prototype.height = function(input) {
         this.each(function(el) {el.style.height = input});
         return this;
     }
-    return goog.style.getBorderBox(this.get(0)).h;
+    return goog.style.getBounds(/** @type {Element} */(this.get(0))).height;
 }
 /**
  * @param {string} selector
@@ -313,7 +313,7 @@ G.prototype.html = function(input) {
     if(!input)
         return this.get(0).innerHTML
     if(goog.isFunction(input))
-        this.each(function(el) {goog.dom.append(/** @type {!Node} */(el), input(el))});
+        this.each(function(el) {goog.dom.append(/** @type {!Node} */(el), /** @type {Function} */(input)(el))});
     if(input.nodeType) {
         this.empty();
         this.each(function(el) {goog.dom.append(/** @type {!Node} */(el), input.cloneNode)});

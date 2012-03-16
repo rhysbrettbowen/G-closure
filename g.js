@@ -1,10 +1,6 @@
 /*
- * Version 0.3
+ * Version 0.2
  */
-//     (c) 2012 Rhys Brett-Bowen, Catch.com
-//     goog.mvc may be freely distributed under the MIT license.
-//     For all details and documentation:
-//     https://github.com/rhysbrettbowen/goog.mvc
 
 goog.provide('G');
 
@@ -15,7 +11,7 @@ goog.require('goog.style');
 
 
 /**
- * @param {string|Element|Node|Array|goog.array.ArrayLike} input
+ * @param {*} input
  * @param {string|Element|Node=} mod
  * @constructor
  * @return {G}
@@ -41,12 +37,15 @@ G = function(input, mod) {
     }
     if(!goog.isArrayLike(input)) {
         input = [input];
-    }
-    
+    }    
     return /** @type {G} */(new G.init(input));
 };
 
 G.prototype.length = 0;
+/** 
+ * @constructor
+ * @extends {G}
+ */
 G.init = function(input) {
     for(var i = 0; i < input.length; i++)
         this[i] = input[i];
@@ -56,8 +55,8 @@ G.init = function(input) {
 G.init.prototype = G.prototype;
 
 G.prototype.constructor = G;
-G.prototype.sort = [].constructor.prototype.sort;
-G.prototype.reverse = [].constructor.prototype.reverse;
+G.prototype.sort = [].constructor.prototype['sort'];
+G.prototype.reverse = [].constructor.prototype['reverse'];
 
 /**
  * takes a string like 'tagName[ .className]', '.className' or '#elementId'
@@ -107,8 +106,9 @@ G.prototype.filter = function(fn, handler) {
             if(select == ":first")
                 return ind===0;
             if(select == ":last")
-                return ind===last;
+                return ind===this.length-1;
         };
+        handler = this;
     }
     return G(goog.array.filter(/** @type {goog.array.ArrayLike} */(this), fn, handler));
 };

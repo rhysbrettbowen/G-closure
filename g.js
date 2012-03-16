@@ -1,6 +1,10 @@
 /*
- * Version 0.2
+ * Version 0.3
  */
+//     (c) 2012 Rhys Brett-Bowen, Catch.com
+//     goog.mvc may be freely distributed under the MIT license.
+//     For all details and documentation:
+//     https://github.com/rhysbrettbowen/goog.mvc
 
 goog.provide('G');
 
@@ -29,22 +33,31 @@ G = function(input, mod) {
             input = G.elsBySelector(input, mod);
         }
         if(!input) {
-            input = []
+            input = [];
         }
     }
     else if(!input) {
-        input = []
+        input = [];
     }
-    if(goog.isArrayLike(input)) {
-        input = goog.array.clone(/** @type {null|{length: number}} */(input));
-        input.__proto__ = function(input){return goog.object.clone([].__proto__)};
-        goog.object.extend(input.__proto__, G.prototype);
+    if(!goog.isArrayLike(input)) {
+        input = [input];
     }
     
-    return /** @type {G} */(input);
+    return /** @type {G} */(new G.init(input));
 };
 
 G.prototype.length = 0;
+G.init = function(input) {
+    for(var i = 0; i < input.length; i++)
+        this[i] = input[i];
+    this.length = input.length;
+    return this;
+};
+G.init.prototype = G.prototype;
+
+G.prototype.constructor = G;
+G.prototype.sort = [].constructor.prototype.sort;
+G.prototype.reverse = [].constructor.prototype.reverse;
 
 /**
  * takes a string like 'tagName[ .className]', '.className' or '#elementId'
@@ -78,11 +91,25 @@ G.prototype.each = function(fn, handler) {
         return this;
 };
 /**
- * @param {Function} fn
+ * @param {Function|string} fn
  * @param {Object=} handler
  * @return {G}
  */
 G.prototype.filter = function(fn, handler) {
+    if(goog.isString(fn)){
+        var select = fn;
+        var length = this.size();
+        fn = function(val, ind) {
+            if(select == ":odd")
+                return ind%2===1;
+            if(select == ":even")
+                return ind%2===0;
+            if(select == ":first")
+                return ind===0;
+            if(select == ":last")
+                return ind===last;
+        };
+    }
     return G(goog.array.filter(/** @type {goog.array.ArrayLike} */(this), fn, handler));
 };
 /**
@@ -99,7 +126,7 @@ G.prototype.map = function(fn, handler) {
  */
 G.prototype.contains = function(obj) {
     return goog.array.contains(/** @type {goog.array.ArrayLike} */(this), obj);
-}
+};
 /**
  * @param {number} ind
  * @return {?Object}
@@ -120,6 +147,21 @@ G.prototype.first = function(){
  */
 G.prototype.last = function(){
     return this.get(-1);
+};
+/**
+ * @return {Array}
+ */
+G.prototype.toArray = function(){
+    var arr = [];
+    this.each(function(val) {arr.push(val);});
+    return arr;
+};
+/**
+ * @param {number} index
+ * @return {G}
+ */
+G.prototype.eq = function(index){
+    return G(this.get(index));
 };
 /**
  * @return {number}
@@ -143,11 +185,11 @@ G.prototype.top = function(input) {
     if(input){
         if(goog.isNumber(input))
             input = input+"px";
-        this.each(function(el) {el.style.top = input});
+        this.each(function(el) {el.style.top = input;});
         return this;
     }
     return goog.style.getBounds(/** @type {Element} */(this.get(0))).top;
-}
+};
 /**
  * @param {string} input
  * @return {G|number}
@@ -156,11 +198,11 @@ G.prototype.left = function(input) {
     if(input){
          if(goog.isNumber(input))
                 input = input+"px";
-        this.each(function(el) {el.style.left = input});
+        this.each(function(el) {el.style.left = input;});
         return this;
     }
     return goog.style.getBounds(/** @type {Element} */(this.get(0))).left;
-}
+};
 /**
  * @param {string} input
  * @return {G|number}
@@ -169,11 +211,11 @@ G.prototype.width = function(input) {
     if(input){
          if(goog.isNumber(input))
                 input = input+"px";
-        this.each(function(el) {el.style.width = input});
+        this.each(function(el) {el.style.width = input;});
         return this;
     }
     return goog.style.getBounds(/** @type {Element} */(this.get(0))).width;
-}
+};
 /**
  * @param {string} input
  * @return {G|number}
@@ -182,11 +224,11 @@ G.prototype.height = function(input) {
     if(input){
          if(goog.isNumber(input))
                 input = input+"px";
-        this.each(function(el) {el.style.height = input});
+        this.each(function(el) {el.style.height = input;});
         return this;
     }
     return goog.style.getBounds(/** @type {Element} */(this.get(0))).height;
-}
+};
 /**
  * @param {string} selector
  * @return {G}
@@ -207,7 +249,7 @@ G.prototype.find = function(selector) {
  * @return {G}
  */
 G.prototype.visible = function(bool) {
-    return this.each(function(el) {goog.style.showElement(el, bool)});
+    return this.each(function(el) {goog.style.showElement(el, bool);});
 };
 /**
  * @return {G}
@@ -235,7 +277,7 @@ G.prototype.attr = function(key, val) {
      if(goog.isObject(key)) {
          this.each(function(el) {
              this.setProperties(key);
-         })
+         });
          return this;
      }
      return this.map(function(el) {return el.getAttribute(key);});
@@ -302,7 +344,7 @@ G.prototype.hasClass = function(className) {
  * @return {G}
  */
 G.prototype.append = function(input) {
-    this.each(function(el) {goog.dom.append(/** @type {!Node} */(el), input)});
+    this.each(function(el) {goog.dom.append(/** @type {!Node} */(el), input);});
     return this;
 };
 /**
@@ -311,14 +353,14 @@ G.prototype.append = function(input) {
  */
 G.prototype.html = function(input) {
     if(!input)
-        return this.get(0).innerHTML
+        return this.get(0).innerHTML;
     if(goog.isFunction(input))
-        this.each(function(el) {goog.dom.append(/** @type {!Node} */(el), /** @type {Function} */(input)(el))});
+        this.each(function(el) {goog.dom.append(/** @type {!Node} */(el), /** @type {Function} */(input)(el));});
     if(input.nodeType) {
         this.empty();
-        this.each(function(el) {goog.dom.append(/** @type {!Node} */(el), input.cloneNode)});
+        this.each(function(el) {goog.dom.append(/** @type {!Node} */(el), input.cloneNode);});
     } else
-        this.each(function(el) {el.innerHTML = input});
+        this.each(function(el) {el.innerHTML = input;});
     return this;
 };
 /**
@@ -331,7 +373,7 @@ G.prototype.text = function(input) {
     if(goog.isFunction(input))
         this.each(input);
     else
-        this.each(function(el) {goog.dom.setTextContent(el, /** @type {string} */(input))});
+        this.each(function(el) {goog.dom.setTextContent(el, /** @type {string} */(input));});
     return this;
 };
 // Events

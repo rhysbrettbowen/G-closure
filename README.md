@@ -21,13 +21,23 @@ If you are using a browser that supports querySelectorAll then G will use that a
 
 ## array functions ##
 
+### .sort(function): G ###
+
+function takes two elements and returns -1,0,1 - same as native Array sort
+
+### .reverse(): G ###
+
+same as native Array reverse
+
 ### .each(function, opt_handler): G ###
 
 accepts a function to run on each element in the array. The function takes three arguments. The value, the index and the array. You can pass in an optional handler to be the "this" in the array. returns the G object
 
 ### .filter(function, opt_handler): G ###
 
-the function can take three arguments, the value, the index and the array and should return true or false. An optional handler can be passed in to act as this. a new G object containing only the values returning true will be returned
+the function can take three arguments, the value, the index and the array and should return true or false. An optional handler can be passed in to act as this. a new G object containing only the values returning true will be returned.
+
+You can also pass in ":odd",":even",":first" or ":last" to get those elements
 
 ### .map(function, opt_handler): G ###
 
@@ -44,6 +54,14 @@ returns the first object in G
 ### .last(): object ###
 
 returns the last element
+
+### .toArray(): Array ###
+
+returns the elements as an array
+
+### .eq(index): G ###
+
+return G object with just the element at index
 
 ### .size(): number ###
 
@@ -194,6 +212,15 @@ removes an event registered with on
 the same as bind but the eventType is set to click for you
 
 ## change log ##
+
+### v0.3 ###
+
+- fixed compile warnings
+- removed __proto__
+- tested and working in IE8
+- reverse, sort from array
+- toArray to get back simple array
+- filter can accept strings
 
 ### v0.2 ###
 

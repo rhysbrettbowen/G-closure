@@ -2,6 +2,11 @@
  * Version 0.2
  */
 
+//     (c) 2012 Rhys Brett-Bowen, Catch.com
+//     goog.mvc may be freely distributed under the MIT license.
+//     For all details and documentation:
+//     https://github.com/rhysbrettbowen/goog.mvc
+
 goog.provide('G');
 
 goog.require('goog.dom');
@@ -331,6 +336,15 @@ G.prototype.addClass = function(className) {
 G.prototype.removeClass = function(className) {
     return this.each(function(el) {goog.dom.classes.remove(el, className);});
 };
+G.prototype.toggleClass = function(className, opt_on) {
+    return this.each(function(el) {
+        if(goog.isDef(opt_on)) {
+            goog.dom.classes.enable(el, className, opt_on);
+        } else {
+            goog.dom.classes.toggle(el, className);
+        }
+    });
+};
 /**
  * @param {string} className
  * @return {G}
@@ -386,10 +400,7 @@ G.prototype.text = function(input) {
  */
 G.prototype.on = function(eventType, fn, handler, eventObject) {
     return this.each(function(el) {
-        if(eventObject)
-            eventObject.listen(el, eventType, fn, false, (handler || el));
-        else
-            goog.events.listen(el, eventType, fn, false, (handler || el));
+        (eventObject || goog.events).listen(el, eventType, fn, false, (handler || el));
     });
 };
 /**
@@ -401,10 +412,7 @@ G.prototype.on = function(eventType, fn, handler, eventObject) {
  */
 G.prototype.off = function(eventType, fn, handler, eventObject) {
     return this.each(function(el) {
-        if(eventObject)
-            eventObject.unlisten(el, eventType, fn, false, (handler || el));
-        else
-            goog.events.unlisten(el, eventType, fn, false, (handler || el));
+        (eventObject || goog.events).unlisten(el, eventType, fn, false, (handler || el));
     });
 }; 
 /**

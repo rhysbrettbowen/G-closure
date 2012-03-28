@@ -183,7 +183,20 @@ G.prototype.add = function(arr) {
 };
 // DOM functions
 /**
- * @param {string} input
+ * @param {Object|string} style
+ * @param {string=} val
+ * @return {G|string}
+ */
+G.prototype.css = function(style, val) {
+     if(goog.isString(style) && !val)
+        return goog.style.getComputedStyle(this[0], style);
+     this.each(function(el) {
+         goog.style.setStyle(el, style, val);
+     });
+     return this;
+};
+/**
+ * @param {string=} input
  * @return {G|number}
  */
 G.prototype.top = function(input) {
@@ -196,7 +209,7 @@ G.prototype.top = function(input) {
     return goog.style.getBounds(/** @type {Element} */(this.get(0))).top;
 };
 /**
- * @param {string} input
+ * @param {string=} input
  * @return {G|number}
  */
 G.prototype.left = function(input) {
@@ -209,7 +222,7 @@ G.prototype.left = function(input) {
     return goog.style.getBounds(/** @type {Element} */(this.get(0))).left;
 };
 /**
- * @param {string} input
+ * @param {string=} input
  * @return {G|number}
  */
 G.prototype.width = function(input) {
@@ -222,7 +235,7 @@ G.prototype.width = function(input) {
     return goog.style.getBounds(/** @type {Element} */(this.get(0))).width;
 };
 /**
- * @param {string} input
+ * @param {string=} input
  * @return {G|number}
  */
 G.prototype.height = function(input) {
@@ -250,23 +263,25 @@ G.prototype.find = function(selector) {
     return G(ret);
 };
 /**
- * @param {boolean} bool
- * @return {G}
+ * @param {boolean=} bool
+ * @return {G|boolean}
  */
 G.prototype.visible = function(bool) {
+    if(!goog.isDef(bool))
+        return goog.style.isElementShown(this[0]);
     return this.each(function(el) {goog.style.showElement(el, bool);});
 };
 /**
  * @return {G}
  */
 G.prototype.show = function() {
-    return this.visible(true);
+    return /** @type {G} */(this.visible(true));
 };
 /**
  * @return {G}
  */
 G.prototype.hide = function(bool) {
-    return this.visible(false);
+    return /** @type {G} */(this.visible(false));
 };
 /**
  * @param {string|Object.<string, string>} key
@@ -281,7 +296,7 @@ G.prototype.attr = function(key, val) {
      }
      if(goog.isObject(key)) {
          this.each(function(el) {
-             this.setProperties(key);
+             goog.dom.setProperties(el, /** @type {Object} */(key));
          });
          return this;
      }
@@ -296,13 +311,29 @@ G.prototype.data = function(key, val) {
     return this.attr('data-'+(key||'id'));
 };
 /**
- * @param {string=} val
  * @return {G}
+ */
+G.prototype.remove = function() {
+    return this.each(function(el) {
+        goog.dom.removeNode(el);
+    });
+};
+/**
+ * @param {Element|Node} node
+ * @return {G}
+ */
+G.prototype.replace = function(node) {
+    goog.dom.replaceNode(node, this[0]);
+    return G(node);
+};
+/**
+ * @param {string=} val
+ * @return {G|string}
  */
 G.prototype.val = function(val) {
     if(goog.isDef(val))
         return this.each(function(el) {el.value = val;});
-    return this.map(function(el) {return el.value;});
+    return this[0].value;
 };
 /**
  * @return {G}
@@ -336,6 +367,11 @@ G.prototype.addClass = function(className) {
 G.prototype.removeClass = function(className) {
     return this.each(function(el) {goog.dom.classes.remove(el, className);});
 };
+/**
+ * @param {string} className
+ * @param {boolean=} opt_on
+ * @return {G}
+ */
 G.prototype.toggleClass = function(className, opt_on) {
     return this.each(function(el) {
         if(goog.isDef(opt_on)) {
@@ -347,11 +383,10 @@ G.prototype.toggleClass = function(className, opt_on) {
 };
 /**
  * @param {string} className
- * @return {G}
+ * @return {boolean}
  */
 G.prototype.hasClass = function(className) {
-    return this.filter(function(el) {
-        goog.dom.classes.has(el, className);});
+    return goog.dom.classes.has(this[0], className);
 };
 /**
  * @param {...goog.dom.Appendable} input
@@ -382,8 +417,8 @@ G.prototype.html = function(input) {
  * @return {G|string}
  */
 G.prototype.text = function(input) {
-    if(!input)
-        return goog.dom.getTextContent(/** @type {Node} */(this.get(0)));
+    if(!goog.isDef(input))
+        return goog.dom.getRawTextContent(/** @type {Node} */(this.get(0)));
     if(goog.isFunction(input))
         this.each(input);
     else
@@ -416,13 +451,54 @@ G.prototype.off = function(eventType, fn, handler, eventObject) {
     });
 }; 
 /**
- * @param {Function} fn
+ * @param {Function=} fn
  * @param {Object=} handler
  * @param {goog.events.EventHandler=} eventObject 
  * @return {G}
  */
 G.prototype.click = function(fn, handler, eventObject) {
+    if(!fn) {
+        return this.each(function(el) {
+            el.dispatchEvent(goog.events.EventType.CLICK);
+        });
+    }
     return this.on(goog.events.EventType.CLICK, fn, handler, eventObject);
+};
+/**
+ * @param {Function} fn
+ * @param {Object=} handler
+ * @param {goog.events.EventHandler=} eventObject 
+ * @return {G}
+ */
+G.prototype.focus = function(fn, handler, eventObject) {
+    return this.on(goog.events.EventType.FOCUS, fn, handler, eventObject);
+};
+/**
+ * @param {Function} fn
+ * @param {Object=} handler
+ * @param {goog.events.EventHandler=} eventObject 
+ * @return {G}
+ */
+G.prototype.blur = function(fn, handler, eventObject) {
+    return this.on(goog.events.EventType.BLUR, fn, handler, eventObject);
+};
+/**
+ * @param {Function} fn
+ * @param {Object=} handler
+ * @param {goog.events.EventHandler=} eventObject 
+ * @return {G}
+ */
+G.prototype.mouseup = function(fn, handler, eventObject) {
+    return this.on(goog.events.EventType.MOUSEUP, fn, handler, eventObject);
+};
+/**
+ * @param {Function} fn
+ * @param {Object=} handler
+ * @param {goog.events.EventHandler=} eventObject 
+ * @return {G}
+ */
+G.prototype.mousedown = function(fn, handler, eventObject) {
+    return this.on(goog.events.EventType.MOUSEDOWN, fn, handler, eventObject);
 };
 
 

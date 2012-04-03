@@ -213,6 +213,12 @@ the same as bind but the eventType is set to click for you
 
 ## change log ##
 
+### v0.4 ###
+
+- fixes throughout
+- passed compilation
+- passes strict linting
+
 ### v0.3 ###
 
 - fixed compile warnings

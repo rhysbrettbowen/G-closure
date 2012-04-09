@@ -213,6 +213,10 @@ the same as bind but the eventType is set to click for you
 
 ## change log ##
 
+### v0.5 ###
+
+lots more functionality - more docs to come
+
 ### v0.4 ###
 
 - fixes throughout

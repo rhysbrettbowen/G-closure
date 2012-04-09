@@ -1,5 +1,5 @@
 /*
- * Version 0.4
+ * Version 0.5
  */
 
 //     (c) 2012 Rhys Brett-Bowen, Catch.com
@@ -12,6 +12,7 @@ goog.provide('G');
 goog.require('goog.array');
 goog.require('goog.dom');
 goog.require('goog.events');
+goog.require('goog.json');
 goog.require('goog.style');
 
 
@@ -23,6 +24,8 @@ goog.require('goog.style');
  * @return {G} the G object.
  */
 G = function(input, opt_mod) {
+  if(input.constructor == G)
+    return /** @type {G} */(input);
   if (goog.isString(opt_mod)) {
         opt_mod = G.elsBySelector(/** @type {string} */(opt_mod))[0];
   }
@@ -50,7 +53,6 @@ G = function(input, opt_mod) {
 
 /** @type {number} */
 G.prototype.length = 0;
-
 
 
 /**
@@ -97,6 +99,87 @@ G.elsBySelector = function(input, opt_mod) {
       input.replace(/.*\./, '') || null, /** @type {Element} */(opt_mod));
 };
 
+G.matches = function(element, selector) {
+  if(!goog.isDef(selector))
+    return true;
+  if(goog.isFunction(selector)) {
+    return selector(element);
+  }
+  var matchesSelector = element['webkitMatchesSelector'] ||
+      element['mozMatchesSelector'] ||
+      element['oMatchesSelector'] ||
+      element['matchesSelector'];
+  if (matchesSelector)
+    return matchesSelector.call(element, selector);
+  var parent = element.parentNode;
+  var els = G.elsBySelector(selector, parent);
+  return goog.array.contains(els, element);
+};
+
+// Utility functions
+
+/**
+ * Extends an object with another object.
+ * This operates 'in-place'; it does not create a new Object.
+ *
+ * @param {Object} obj  The object to modify.
+ * @param {...Object} var_args The objects from which values will be copied.
+ * @return {Object}
+ */
+G.extend = function(obj, var_args) {
+  goog.object.extend(obj, var_args);
+  return obj;
+};
+
+/**
+ * Whether a node contains another node.
+ * @param {Node} parent The node that should contain the other node.
+ * @param {Node} descendant The node to test presence of.
+ * @return {boolean} Whether the parent node contains the descendent node.
+ */
+G.contains = goog.dom.contains;
+
+
+G.data = function(element, key, value) {
+  return G(element).data(key, value);
+};
+
+G.each = function(collection, callback) {
+  return G(collection).each(callback);
+};
+
+G.grep = function(array, fn, opt_invert) {
+  var func = fn;
+  if (opt_invert)
+    func = function(el, ind) {
+      return !fn(el, ind);
+    };
+  return goog.array.filter(array, func);
+};
+
+G.inArray = function (value, array, opt_index) {
+  return goog.array.indexOf(array, value, opt_index);
+};
+
+G.map = function(array, callback) {
+  if(goog.isArrayLike(array)) {
+    return goog.array.map(array, callback);
+  } else {
+    return goog.object.map(array, callback);
+  }
+};
+
+G.merge = goog.array.concat;
+
+G.parseJSON = goog.json.parse;
+
+G.proxy = goog.bind;
+
+G.trim = goog.string.trim;
+
+G.unique = goog.array.removeDuplicates;
+
+G.noop = goog.nullFunction;
 
 // Array Functions
 /**
@@ -105,8 +188,10 @@ G.elsBySelector = function(input, opt_mod) {
  * @return {G} the G object.
  */
 G.prototype.each = function(fn, opt_handler) {
-  goog.array.forEach(/** @type {goog.array.ArrayLike} */(this), fn,
-      opt_handler);
+  goog.array.forEach(/** @type {goog.array.ArrayLike} */(this),
+      function(el) {
+        goog.bind(fn, opt_handler || el)(el);
+      });
   return this;
 };
 
@@ -139,7 +224,7 @@ G.prototype.reverse = function() {
  * @param {Object=} opt_handler to bind 'this' to.
  * @return {G} the G object.
  */
-G.prototype.filter = function(fn, opt_handler) {
+G.prototype.grep = function(fn, opt_handler) {
   if (goog.isString(fn)) {
     var select = fn;
     var length = this.size();
@@ -212,7 +297,6 @@ G.prototype.last = function() {
   return this.get(-1);
 };
 
-
 /**
  * @return {Array} a plain array.
  */
@@ -245,12 +329,14 @@ G.prototype.size = function() {
  * @return {G} the G object.
  */
 G.prototype.add = function(arr) {
-  if (goog.isArrayLike(arr))
-    return G(goog.array.concat(/** @type {goog.array.ArrayLike} */(this),
-        arr));
-  var array = this.toArray();
-  goog.array.insert(array, arr);
-  return G(array);
+  var array = G(arr);
+  var length = array.length;
+  var alength = this.length;
+  for(var i = 0; i < length; i++) {
+    this[i + alength] = array[i];
+  }
+  this.length = length+alength;
+  return this;
 };
 
 
@@ -475,6 +561,27 @@ G.prototype.prev = function() {
 };
 
 
+G.prototype.children = function(selector) {
+  var arr = [];
+  this.each(function(el) {
+    goog.array.concat(arr, goog.dom.getChildren(el));
+  });
+  G.unique(arr);
+  if(selector)
+    return G(arr).grep(function(el) {
+      return G.matches(el, selector);
+    });
+  return G(arr);
+};
+
+
+G.prototype.detach = function() {
+  return this.each(function(el) {
+    goog.dom.removeNode(el);
+  });
+};
+
+
 /**
  * @param {string} className to add to all elements.
  * @return {G} the G object.
@@ -524,6 +631,14 @@ G.prototype.hasClass = function(className) {
  */
 G.prototype.append = function(input) {
   this.each(function(el) {goog.dom.append(/** @type {!Node} */(el), input);});
+  return this;
+};
+
+
+G.prototype.appendTo = function(input) {
+  var append = G(input);
+  this.each(function(el) {goog.dom.append(/** @type {!Node} */(append[0]),
+      el);});
   return this;
 };
 
@@ -585,6 +700,9 @@ G.prototype.on = function(eventType, fn, opt_handler, opt_eventObject) {
 };
 
 
+G.prototype.bind = G.prototype.on;
+
+
 /**
  * @param {string} eventType the event name.
  * @param {Function} fn function to remove.
@@ -601,6 +719,9 @@ G.prototype.off = function(eventType, fn, opt_handler, opt_eventObject) {
 };
 
 
+G.prototype.unbind = G.prototype.off;
+
+
 /**
  * @param {Function} fn function to apply.
  * @param {Object=} opt_handler to bind 'this' to.
@@ -615,6 +736,24 @@ G.prototype.click = function(fn, opt_handler, opt_eventObject) {
     });
   }
   return this.on(goog.events.EventType.CLICK, fn, opt_handler,
+      opt_eventObject);
+};
+
+
+/**
+ * @param {Function} fn function to apply.
+ * @param {Object=} opt_handler to bind 'this' to.
+ * @param {goog.events.EventHandler=} opt_eventObject the event handler to use
+ * defaults to goog.events.
+ * @return {G} the G object.
+ */
+G.prototype.change = function(fn, opt_handler, opt_eventObject) {
+  if (!fn) {
+    return this.each(function(el) {
+      el.dispatchEvent(goog.events.EventType.CHANGE);
+    });
+  }
+  return this.on(goog.events.EventType.CHANGE, fn, opt_handler,
       opt_eventObject);
 };
 

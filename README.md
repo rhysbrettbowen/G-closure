@@ -19,6 +19,79 @@ the className is optional in the last selector. You can also pass through an ele
 
 If you are using a browser that supports querySelectorAll then G will use that and any valid selector for that browser can be passed.
 
+## Utilities ##
+
+### G.elsBySelector(selector, context): Array ###
+
+will return an array of elements matching the selector underneath the optional context element
+
+### G.matches(element, selector): boolean ###
+
+returns whether an element matches a selector string or function that returns a boolean
+
+### G.extend(object, ...objects): object ###
+
+extends the first object with the objects given and return that object
+
+### G.contains(container, child): boolean ###
+
+whether the container element holds the child element in it's tree
+
+### G.data(Element, key): string ###
+
+the data that was saved on the element
+
+### G.data(Element, key, value): G ###
+
+sets the data for an element and returns the element in a G object
+
+### G.each(collection, callback): G ###
+
+runs the callback function taking the element and the index on each element in the collection, returning the collection in a G object
+
+### G.grep(array, filter, opt_invert): array ###
+
+filters an array based on the filter function. You can optionally invert the results
+
+### G.inArray(value, array, opt_index): number ###
+
+returns the index of a value in the array optionally searching from an index
+
+### G.map(array, callback): array ###
+
+returns an array where the values are transformed by a function that takes in the element and the index and returns the new value
+
+### G.param(object): string ###
+
+changes an object in to a parameter string where arrays are broken out:
+a = [1,2] -> a=1&a=2
+and objects are recursively given square brackets
+a = {a:1, b:2} -> a[a]=1&a[b]=2
+
+### G.merge(array, array): array ###
+
+merge two arrays together
+
+### G.parseJSON(string): object ###
+
+convert a json string to an object
+
+### G.proxy(function, this): function ###
+
+binds 'this' to the given object for a function
+
+### G.trim(string): string ###
+
+trims whitespace from a string
+
+### G.unique(array): array ###
+
+removes duplicates from an array
+
+### G.noop() ###
+
+a blank function
+
 ## array functions ##
 
 ### .sort(function): G ###
@@ -38,6 +111,10 @@ accepts a function to run on each element in the array. The function takes three
 the function can take three arguments, the value, the index and the array and should return true or false. An optional handler can be passed in to act as this. a new G object containing only the values returning true will be returned.
 
 You can also pass in ":odd",":even",":first" or ":last" to get those elements
+
+### .not(function, opt_handler) ###
+
+returns the inverse of filter
 
 ### .map(function, opt_handler): G ###
 
@@ -69,7 +146,11 @@ returns the length of G
 
 ### .add(array): G ###
 
-adds an array on to the end of G 
+adds an array on to the end of G
+
+### .remove(element): G ###
+
+removes an element from G
 
 ### .contains(obj): Boolean ###
 
@@ -78,6 +159,18 @@ tests if the array contains an object
 ## DOM functions ##
 
 these will only work on G objects containing elements
+
+### .css(name, value): G ###
+
+sets a style on all elements
+
+### .css(object): G ###
+
+sets a hash map of style keys and values on each element
+
+### .css(name): string ###
+
+gets the computed style on the first element for name
 
 ### .top(): Number ###
 
@@ -111,6 +204,10 @@ returns the height offset of the first element
 
 sets the element.style.height attribute
 
+### .index(selector): number ###
+
+returns the index of the first element that matches a selector
+
 ### .find(selector): G ###
 
 return a G with all the elements matching the selector under the current elements in G
@@ -143,6 +240,14 @@ return a G array holding the values of the "data-string" attribute for the eleme
 
 sets the data pair of the elements
 
+### .removeNode(): G ###
+
+removes the nodes from the document
+
+### .replace(element): G ###
+
+replaces the first element in G with the element and returns a new G with the new node only
+
 ### .val(): G ###
 
 returns a G array of the value of form elements
@@ -163,6 +268,14 @@ return the next sibling of the node
 
 return the previous sibling of the node
 
+### .children(selector): G ###
+
+returns a G with the children of the elements optionally filtering on a selector
+
+### .detach(selector): G ###
+
+removes elements that match the selector fromt he document
+
 ### .addClass(string): G ###
 
 adds class to all elements
@@ -171,13 +284,29 @@ adds class to all elements
 
 removes a class from all elements
 
+### .toggleClass(string, on/off): G ###
+
+toggles the className, optionally pass a boolean for whether it should be toggled on or off
+
 ### .hasClass(string): G ###
 
 return a G array of the elements that have the given class
 
+### .has(selector): G ###
+
+returns a G which is filtered based on the selector
+
 ### .append(input): G ###
 
 appends the input to all elements, can be a function, string or Node/NodeList
+
+### .appendTo(input): G ###
+
+appends all the elements to the element which matches the input which can be a G, element, selector or function returning and element
+
+### .clone(deep): G ###
+
+returns a G with cloned nodes, can pass whether to do a deep copy
 
 ### .html(): G ###
 
@@ -203,19 +332,38 @@ these are usually used for element arrays, but can also be applied to EventTarge
 
 takes in the event type (i.e. goog.events.CLICK or "click"), the handling function which takes in the Event, an optional handler to be used as "this" and an optional eventObject (use this with goog.ui.Component and pass in this.getHandler()).
 
+### bind ###
+
+alias for on
+
 ### .off(eventType, function, handler, eventObject): G ###
 
 removes an event registered with on
+
+### unbind ###
+
+alias for off
 
 ### .click(function, handler, eventObject): G ###
 
 the same as bind but the eventType is set to click for you
 
+### other events you can call ###
+
+- .focus()
+- .blur()
+- .mouseup()
+- .mousedown()
+- .mouseover()
+- .mouseout()
+
 ## change log ##
 
 ### v0.5 ###
 
-lots more functionality - more docs to come
+- more utility functions
+- behaves more like jquery
+- more docs
 
 ### v0.4 ###
 

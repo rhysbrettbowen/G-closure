@@ -78,6 +78,57 @@ G.prototype.constructor = G;
 
 
 /**
+ * css filters and their corresponding filter functions
+ */
+G.cssFilters = {
+  /**
+   * @param {Element|Node} el to check.
+   * @return {boolean} whether element matches the filter.
+   */
+  'visible': function(el) {return /** @type {boolean} */(G(el).visible());},
+  /**
+   * @param {Element|Node} el to check.
+   * @return {boolean} whether element matches the filter.
+   */
+  'hidden': function(el) {return !/** @type {boolean} */(G(el).visible());},
+  /**
+   * @param {Element|Node} el to check.
+   * @return {boolean} whether element matches the filter.
+   */
+  'selected': function(el) {return el.selected;},
+  /**
+   * @param {Element|Node} el to check.
+   * @return {boolean} whether element matches the filter.
+   */
+  'checked': function(el) {return el.checked;},
+  /**
+   * @param {Element|Node} el to check.
+   * @return {boolean} whether element matches the filter.
+   */
+  'first': function(el) {return el == el.parentNode.firstChild;},
+  /**
+   * @param {Element|Node} el to check.
+   * @return {boolean} whether element matches the filter.
+   */
+  'last': function(el) {return el == el.parentNode.lastChild;},
+  /**
+   * @param {Element|Node} el to check.
+   * @return {boolean} whether element matches the filter.
+   */
+  'even': function(el) {
+    return (G(el.parentNode).children().index(el) % 2) === 0;
+  },
+  /**
+   * @param {Element|Node} el to check.
+   * @return {boolean} whether element matches the filter.
+   */
+  'odd': function(el) {
+    return (G(el.parentNode).children().index(el) % 2) === 1;
+  }
+};
+
+
+/**
  * takes a string like 'tagName[ .className]', '.className' or '#elementId'
  * mod is the element to search from
  *
@@ -86,18 +137,27 @@ G.prototype.constructor = G;
  * @return {goog.array.ArrayLike} nodelist of found elements.
  */
 G.elsBySelector = function(input, opt_mod) {
+  var ret;
   opt_mod = opt_mod || document;
-  if (opt_mod.querySelectorAll)
-    return opt_mod.querySelectorAll(input);
-  if (input.charAt(0) == '.') {
-    return (goog.dom.getElementsByClass(input.substring(1),
+  if (opt_mod.querySelectorAll) {
+    ret = opt_mod.querySelectorAll(input.indexOf(':') >= 0 ?
+        input.replace(/\:.*/, '') :
+        input);
+  } else if (input.charAt(0) == '.') {
+    ret = (goog.dom.getElementsByClass(input.substring(1)
+        .replace(/[\:\s].*/, ''),
         /** @type {Element} */(opt_mod)) || []);
+  } else if (input.charAt(0) == '#') {
+    ret = [goog.dom.getElement(input)];
+  } else {
+    ret = goog.dom.getElementsByTagNameAndClass(input.replace(/\s.*/, ''),
+        input.replace(/.*\./, '').replace(/[\:\s].*/, '') || null,
+        /** @type {Element} */(opt_mod));
   }
-  if (input.charAt(0) == '#') {
-    return [goog.dom.getElement(input)];
+  if (input.indexOf(':') >= 0) {
+    return G.grep(ret, G.cssFilters[input.substring(input.indexOf(':') + 1)]);
   }
-  return goog.dom.getElementsByTagNameAndClass(input.replace(/\s.*/, ''),
-      input.replace(/.*\./, '') || null, /** @type {Element} */(opt_mod));
+  return ret;
 };
 
 
@@ -429,7 +489,9 @@ G.prototype.filter = function(fn, opt_handler, opt_not) {
   }
   return G(goog.array.filter(/** @type {goog.array.ArrayLike} */(this),
       function(el, ind) {
-        return opt_not ? !fn(el, ind) : fn(el, ind);
+        return opt_not ?
+            !/** @type {Function} */(fn)(el, ind) :
+            /** @type {Function} */(fn)(el, ind);
       }, opt_handler));
 };
 
@@ -784,7 +846,7 @@ G.prototype.prev = function() {
 G.prototype.children = function(opt_selector) {
   var arr = [];
   this.each(function(el) {
-    goog.array.concat(arr, goog.dom.getChildren(el));
+    arr = goog.array.concat(arr, [].slice.call(goog.dom.getChildren(el)));
   });
   G.unique(arr);
   if (goog.isDef(opt_selector))

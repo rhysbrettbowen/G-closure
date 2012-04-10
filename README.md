@@ -19,6 +19,17 @@ the className is optional in the last selector. You can also pass through an ele
 
 If you are using a browser that supports querySelectorAll then G will use that and any valid selector for that browser can be passed.
 
+You can also add in some css filters by putting :filter at the end of the string. Here are the filters that are supported
+
+- visible
+- hidden
+- selected
+- checked
+- first
+- last
+- even
+- odd
+
 ## Utilities ##
 
 ### G.elsBySelector(selector, context): Array ###
@@ -364,6 +375,7 @@ the same as bind but the eventType is set to click for you
 - more utility functions
 - behaves more like jquery
 - more docs
+- some css filters work
 
 ### v0.4 ###
 

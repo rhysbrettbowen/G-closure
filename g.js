@@ -435,8 +435,8 @@ G.noop = goog.nullFunction;
  */
 G.prototype.each = function(fn, opt_handler) {
   goog.array.forEach(/** @type {goog.array.ArrayLike} */(this),
-      function(el) {
-        goog.bind(fn, opt_handler || el)(el);
+      function(el, index) {
+        goog.bind(fn, opt_handler || el)(el, index);
       });
   return this;
 };
@@ -490,9 +490,11 @@ G.prototype.filter = function(fn, opt_handler, opt_not) {
   return G(goog.array.filter(/** @type {goog.array.ArrayLike} */(this),
       function(el, ind) {
         return opt_not ?
-            !/** @type {Function} */(fn)(el, ind) :
-            /** @type {Function} */(fn)(el, ind);
-      }, opt_handler));
+            !/** @type {Function} */(goog.bind(fn,
+                opt_handler || this)(el, ind)) :
+            /** @type {Function} */(goog.bind(fn,
+                opt_handler || this)(el, ind));
+      }));
 };
 
 
@@ -935,11 +937,16 @@ G.prototype.hasClass = function(className) {
 
 
 /**
- * @param {...goog.dom.Appendable} input (s) things to append.
+ * @param {...goog.dom.Appendable} var_args (s) things to append.
  * @return {G} the G object.
  */
-G.prototype.append = function(input) {
-  this.each(function(el) {goog.dom.append(/** @type {!Node} */(el), input);});
+G.prototype.append = function(var_args) {
+  var args = arguments;
+  if(goog.isArrayLike(args[0]))
+    args = args[0];
+  this.each(function(el) {
+    goog.dom.append.apply(this, G.merge([el], args));
+  });
   return this;
 };
 

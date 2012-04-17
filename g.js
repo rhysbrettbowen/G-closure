@@ -1,7 +1,3 @@
-/*
- * Version 0.5
- */
-
 //     (c) 2012 Rhys Brett-Bowen, Catch.com
 //     G-object may be freely distributed under the MIT license.
 //     For all details and documentation:
@@ -24,13 +20,21 @@ goog.require('goog.style');
  * @return {G} the G object.
  */
 G = function(input, opt_mod) {
+
+  // already a G so return
   if (input.constructor == G)
     return /** @type {G} */(input);
+
+  // if the mod is a string it's a selector
   if (goog.isString(opt_mod)) {
     opt_mod = G.elsBySelector(/** @type {string} */(opt_mod))[0];
   }
+
+  // if it's an element then wrap it
   if (input.nodeType)
     input = [input];
+
+  // a string is a selector
   else if (goog.isString(input)) {
     if (input.charAt(0) == '<') {
       input = [goog.dom.htmlToDocumentFragment(input)];
@@ -41,12 +45,18 @@ G = function(input, opt_mod) {
       input = [];
     }
   }
+
+  // no input is an empty G object
   else if (!input) {
     input = [];
   }
+
+  // if it's not an array then make it one
   if (!goog.isArrayLike(input)) {
     input = [input];
   }
+
+  // G is actually G.init instantiated with an array
   return /** @type {G} */(new G.init(/** @type {{length: number}} */(input)));
 };
 
@@ -63,6 +73,7 @@ G.prototype.length = 0;
  * @return {G} the new G object.
  */
 G.init = function(input) {
+  // copy all elements in to the object and return itself as G
   for (var i = 0; i < input.length; i++)
     this[i] = input[i];
   this.length = input.length;
@@ -139,10 +150,14 @@ G.cssFilters = {
 G.elsBySelector = function(input, opt_mod) {
   var ret;
   opt_mod = opt_mod || document;
+  
+  // use native querySelectorAll if available
   if (opt_mod.querySelectorAll) {
     ret = opt_mod.querySelectorAll(input.indexOf(':') >= 0 ?
         input.replace(/\:.*/, '') :
         input);
+
+  // if not then parse string and use closure library functions
   } else if (input.charAt(0) == '.') {
     ret = (goog.dom.getElementsByClass(input.substring(1)
         .replace(/[\:\s].*/, ''),
@@ -154,6 +169,8 @@ G.elsBySelector = function(input, opt_mod) {
         input.replace(/.*\./, '').replace(/[\:\s].*/, '') || null,
         /** @type {Element} */(opt_mod));
   }
+
+  // filter the results with css filters
   if (input.indexOf(':') >= 0) {
     return G.grep(ret, G.cssFilters[input.substring(input.indexOf(':') + 1)]);
   }
@@ -172,17 +189,24 @@ G.elsBySelector = function(input, opt_mod) {
  * @return {boolean} if the element matches the selector.
  */
 G.matches = function(element, opt_selector) {
+
+  // handle where opt selector is function or not defined
   if (!goog.isDef(opt_selector))
     return true;
   if (goog.isFunction(opt_selector)) {
     return opt_selector(element);
   }
+
+  // use native MatechesSelector where available
   var matchesSelector = element['webkitMatchesSelector'] ||
       element['mozMatchesSelector'] ||
       element['oMatchesSelector'] ||
       element['matchesSelector'];
-  if (matchesSelector)
+  if (matchesSelector) {
     return matchesSelector.call(element, opt_selector);
+  }
+
+  // else see if element is in it's parent if calling the selector on it
   var parent = element.parentNode;
   var els = G.elsBySelector(/** @type {string} */(opt_selector), parent);
   return goog.array.contains(els, element);
@@ -319,7 +343,10 @@ G.param = function(obj) {
     }
     return false;
   };
-  while (goog.object.some(myObj, check)) {}
+  var flag = false;
+  while (flag) {
+    flag = goog.object.some(myObj, check);
+  }
   return goog.Uri.QueryData.createFromMap(myObj).toString();
 };
 
@@ -466,34 +493,39 @@ G.prototype.reverse = function() {
 
 
 /**
- * @param {Function|string} fn to  - return true to keep element.
+ * @param {Function|string} fn function return true to keep element.
  * @param {Object=} opt_handler to bind 'this' to.
  * @param {boolean=} opt_not whther to inverse the results.
  * @return {G} the G object.
  */
 G.prototype.filter = function(fn, opt_handler, opt_not) {
+
+  // handles some css filter strings
   if (goog.isString(fn)) {
     var select = fn;
     var length = this.size();
-    fn = function(val, ind) {
-      if (select == ':odd')
+    fn = {
+      ':odd': function(val, ind) {
         return ind % 2 === 1;
-      if (select == ':even')
+      },
+      ':even': function(val, ind) {
         return ind % 2 === 0;
-      if (select == ':first')
+      },
+      ':first': function(val, ind) {
         return ind === 0;
-      if (select == ':last')
-        return ind === this.length - 1;
-    };
+      },
+      ':last': function(val, ind) {
+        return ind === this.length -1;
+      }
+    }[select];
     opt_handler = this;
   }
+
+  // filters based on handler and whether opt_not is used
   return G(goog.array.filter(/** @type {goog.array.ArrayLike} */(this),
       function(el, ind) {
-        return opt_not ?
-            !/** @type {Function} */(goog.bind(fn,
-                opt_handler || this)(el, ind)) :
-            /** @type {Function} */(goog.bind(fn,
-                opt_handler || this)(el, ind));
+        return opt_not != Boolean(/** @type {Function} */(goog.bind(fn,
+                opt_handler || this)(el, ind)));
       }));
 };
 
@@ -1016,17 +1048,55 @@ G.prototype.text = function(opt_input) {
 
 // Events
 /**
+ * change to match jquery. Optional selector and data. Selector must be
+ * a string and data must be an object. should de int he form:
+ *
+ * .on(eventType[, selector][, data], fn(event)[, this][, eventObject])
+ *
  * @param {string} eventType the event name.
- * @param {Function} fn function to apply.
- * @param {Object=} opt_handler to bind 'this' to.
+ * @param {string|Object|Function} selector to match to element.
+ * @param {Function|Object=} opt_data data to in event.data.
+ * @param {Function|Object|goog.events.EventHandler==} opt_fn function to 
+ * apply.
+ * @param {Object|goog.events.EventHandler==} opt_handler to bind 'this' 
+ * to will default to the element. 
  * @param {goog.events.EventHandler=} opt_eventObject the event handler to use
- * defaults to goog.events.
+ * defaults to goog.events, for goog.ui.component can pass in
+ * this.getHandler().
  * @return {G} the G object.
  */
-G.prototype.on = function(eventType, fn, opt_handler, opt_eventObject) {
+G.prototype.on = function(eventType, selector, opt_data, opt_fn, 
+    opt_handler, opt_eventObject) {
+
+  // fix how the data is passed in
+  if (goog.isFunction(selector)) {
+    opt_eventObject = opt_fn;
+    opt_handler = opt_data;
+    opt_fn = selector;
+    selector = undefined;
+    opt_data = undefined;
+  } else if (goog.isFunction(opt_data)) {
+    opt_handler = opt_fn;
+    opt_fn = opt_data;
+    opt_data = undefined;
+    if(goog.isObject(selector)) {
+      opt_data = selector;
+      selector = undefined;
+    }
+  }
+  
+  // put data on e and check against selector whether to run
   return this.each(function(el) {
-    (opt_eventObject || goog.events).listen(el, eventType, fn, false,
-        (opt_handler || el));
+    (opt_eventObject || goog.events).listen(el, eventType, function(e) {
+        if(!e.data) {
+          e.data = opt_data;
+        }
+        if (goog.isString(selector) &&
+            (!e.target.nodeType || !G.matches(e.target, selector))) {
+          return;
+        }
+        goog.bind(opt_fn, this)(e);
+      }, false, (opt_handler || el));
   });
 };
 

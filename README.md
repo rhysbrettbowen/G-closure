@@ -339,9 +339,9 @@ sets the textContent of the elements
 
 these are usually used for element arrays, but can also be applied to EventTargets
 
-### .on(eventType, function, handler, eventObject): G ###
+### .on(eventType[, selector][, data], fn(event)[, this][, eventObject]):G ###
 
-takes in the event type (i.e. goog.events.CLICK or "click"), the handling function which takes in the Event, an optional handler to be used as "this" and an optional eventObject (use this with goog.ui.Component and pass in this.getHandler()).
+takes in the event type (i.e. goog.events.CLICK or "click"), an optional selector (must be a string) to test against the target, optional data to get on event.data (must be an Object), the handling function which takes in the Event, an optional handler to be used as "this" and an optional eventObject (use this with goog.ui.Component and pass in this.getHandler()).
 
 ### bind ###
 
@@ -369,6 +369,11 @@ the same as bind but the eventType is set to click for you
 - .mouseout()
 
 ## change log ##
+
+## v0.6 ###
+
+- small enhancements in code
+- on now mimics JQuery's latest (see signature above)
 
 ### v0.5 ###
 

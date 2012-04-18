@@ -339,23 +339,32 @@ sets the textContent of the elements
 
 these are usually used for element arrays, but can also be applied to EventTargets
 
-### .on(eventType[, selector][, data], fn(event)[, this][, eventObject]):G ###
+### G.on(): uid ###
 
-takes in the event type (i.e. goog.events.CLICK or "click"), an optional selector (must be a string) to test against the target, optional data to get on event.data (must be an Object), the handling function which takes in the Event, an optional handler to be used as "this" and an optional eventObject (use this with goog.ui.Component and pass in this.getHandler()).
+same as goog.events.listen
+
+### G.off(uids): boolean ###
+
+pass an array of listener ids to turn them off, passes back if it was
+succesfule
+
+### .on(eventType[, selector][, data], fn(event)[, this][, eventObject]):Array ###
+
+takes in the event type (i.e. goog.events.CLICK or "click"), an optional selector (must be a string) to test against the target, optional data to get on event.data (must be an Object), the handling function which takes in the Event, an optional handler to be used as "this" and an optional eventObject (use this with goog.ui.Component and pass in this.getHandler()). returns a list of uids that can be passed to G.off
 
 ### bind ###
 
 alias for on
 
-### .off(eventType, function, handler, eventObject): G ###
+### .off(eventType, function, handler, eventObject): boolean ###
 
-removes an event registered with on
+removes an event registered with on, passes back it it was succesful
 
 ### unbind ###
 
 alias for off
 
-### .click(function, handler, eventObject): G ###
+### .click(function, handler, eventObject): uids ###
 
 the same as bind but the eventType is set to click for you
 
@@ -373,7 +382,7 @@ the same as bind but the eventType is set to click for you
 ## v0.6 ###
 
 - small enhancements in code
-- on now mimics JQuery's latest (see signature above)
+- on now mimics JQuery's latest (see signature above) and code comments
 
 ### v0.5 ###
 

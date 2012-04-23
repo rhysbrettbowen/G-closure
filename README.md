@@ -383,6 +383,7 @@ the same as bind but the eventType is set to click for you
 
 - small enhancements in code
 - on now mimics JQuery's latest (see signature above) and code comments
+- can use - for first selector character instead of .
 
 ### v0.5 ###
 

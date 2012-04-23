@@ -3,7 +3,10 @@
 //     For all details and documentation:
 //     https://github.com/rhysbrettbowen/G-closure
 
+goog.provide('$');
+goog.provide('$$');
 goog.provide('G');
+goog.provide('GG');
 
 goog.require('goog.array');
 goog.require('goog.dom');
@@ -27,7 +30,7 @@ G = function(input, opt_mod) {
 
   // if the mod is a string it's a selector
   if (goog.isString(opt_mod)) {
-    opt_mod = G.elsBySelector(/** @type {string} */(opt_mod))[0];
+    opt_mod = GG.elsBySelector(/** @type {string} */(opt_mod))[0];
   }
 
   // if it's an element then wrap it
@@ -39,7 +42,7 @@ G = function(input, opt_mod) {
     if (input.charAt(0) == '<') {
       input = [goog.dom.htmlToDocumentFragment(input)];
     } else {
-      input = G.elsBySelector(input, opt_mod);
+      input = GG.elsBySelector(input, opt_mod);
     }
     if (!input) {
       input = [];
@@ -59,6 +62,11 @@ G = function(input, opt_mod) {
   // G is actually G.init instantiated with an array
   return /** @type {G} */(new G.init(/** @type {{length: number}} */(input)));
 };
+
+
+$ = G;
+GG = {};
+$$ = GG;
 
 
 /** @type {number} */
@@ -91,7 +99,7 @@ G.prototype.constructor = G;
 /**
  * css filters and their corresponding filter functions
  */
-G.cssFilters = {
+GG.cssFilters = {
   /**
    * @param {Element|Node} el to check.
    * @return {boolean} whether element matches the filter.
@@ -147,10 +155,11 @@ G.cssFilters = {
  * @param {Element|Node=} opt_mod element or node to look under.
  * @return {goog.array.ArrayLike} nodelist of found elements.
  */
-G.elsBySelector = function(input, opt_mod) {
+GG.elsBySelector = function(input, opt_mod) {
   var ret;
   opt_mod = opt_mod || document;
-
+  if (input.charAt(0) == '-')
+    input = '.' + input.substring(1);
   // use native querySelectorAll if available
   if (opt_mod.querySelectorAll) {
     ret = opt_mod.querySelectorAll(input.indexOf(':') >= 0 ?
@@ -172,7 +181,7 @@ G.elsBySelector = function(input, opt_mod) {
 
   // filter the results with css filters
   if (input.indexOf(':') >= 0) {
-    return G.grep(ret, G.cssFilters[input.substring(input.indexOf(':') + 1)]);
+    return GG.grep(ret, GG.cssFilters[input.substring(input.indexOf(':') + 1)]);
   }
   return ret;
 };
@@ -188,7 +197,7 @@ G.elsBySelector = function(input, opt_mod) {
  * returns boolean or a selector string.
  * @return {boolean} if the element matches the selector.
  */
-G.matches = function(element, opt_selector) {
+GG.matches = function(element, opt_selector) {
 
   // handle where opt selector is function or not defined
   if (!goog.isDef(opt_selector))
@@ -196,7 +205,8 @@ G.matches = function(element, opt_selector) {
   if (goog.isFunction(opt_selector)) {
     return opt_selector(element);
   }
-
+  if (opt_selector.charAt(0) == '-')
+    opt_selector = '.' + opt_selector.substring(1);
   // use native MatechesSelector where available
   var matchesSelector = element['webkitMatchesSelector'] ||
       element['mozMatchesSelector'] ||
@@ -208,7 +218,7 @@ G.matches = function(element, opt_selector) {
 
   // else see if element is in it's parent if calling the selector on it
   var parent = element.parentNode;
-  var els = G.elsBySelector(/** @type {string} */(opt_selector), parent);
+  var els = GG.elsBySelector(/** @type {string} */(opt_selector), parent);
   return goog.array.contains(els, element);
 };
 
@@ -223,7 +233,7 @@ G.matches = function(element, opt_selector) {
  * @param {...Object} var_args The objects from which values will be copied.
  * @return {Object} that was extended.
  */
-G.extend = function(obj, var_args) {
+GG.extend = function(obj, var_args) {
   goog.object.extend(obj, var_args);
   return obj;
 };
@@ -235,7 +245,7 @@ G.extend = function(obj, var_args) {
  * @param {Node} descendant The node to test presence of.
  * @return {boolean} Whether the parent node contains the descendent node.
  */
-G.contains = goog.dom.contains;
+GG.contains = goog.dom.contains;
 
 
 /**
@@ -246,7 +256,7 @@ G.contains = goog.dom.contains;
  * @param {string=} opt_value the value to set for the key.
  * @return {G|string} the element wrapped in a G.
  */
-G.data = function(element, opt_key, opt_value) {
+GG.data = function(element, opt_key, opt_value) {
   return G(element).data(opt_key, opt_value);
 };
 
@@ -258,7 +268,7 @@ G.data = function(element, opt_key, opt_value) {
  * @param {Function} callback function to run.
  * @return {G} collection as a G object.
  */
-G.each = function(collection, callback) {
+GG.each = function(collection, callback) {
   return G(collection).each(callback);
 };
 
@@ -271,7 +281,7 @@ G.each = function(collection, callback) {
  * @param {boolean=} opt_invert whether to have the opposite returned.
  * @return {Array} the filtered array.
  */
-G.grep = function(array, fn, opt_invert) {
+GG.grep = function(array, fn, opt_invert) {
   var func = fn;
   if (opt_invert)
     func = function(el, ind) {
@@ -289,7 +299,7 @@ G.grep = function(array, fn, opt_invert) {
  * @param {number=} opt_index  to look from.
  * @return {number} the index of the value.
  */
-G.inArray = function(value, array, opt_index) {
+GG.inArray = function(value, array, opt_index) {
   return goog.array.indexOf(array, value, opt_index);
 };
 
@@ -302,7 +312,7 @@ G.inArray = function(value, array, opt_index) {
  * returned value.
  * @return {Array|Object} the mapped array/object.
  */
-G.map = function(array, callback) {
+GG.map = function(array, callback) {
   if (goog.isArrayLike(array)) {
     return goog.array.map(/** @type {goog.array.ArrayLike} */(array),
         callback);
@@ -331,7 +341,7 @@ G.map = function(array, callback) {
  * @param {Object} obj to change in to a parameter string.
  * @return {string} the query string.
  */
-G.param = function(obj) {
+GG.param = function(obj) {
   var myObj = goog.object.clone(obj);
   var check = function(val, key) {
     if (!goog.isArray(val) && goog.isObject(val)) {
@@ -378,7 +388,7 @@ G.param = function(obj) {
  *     added, while primitives and objects will be added as is.
  * @return {!Array} The new resultant array.
  */
-G.merge = goog.array.concat;
+GG.merge = goog.array.concat;
 
 
 /**
@@ -391,7 +401,7 @@ G.merge = goog.array.concat;
  * @param {*} s The JSON string to parse.
  * @return {Object} The object generated from the JSON string.
  */
-G.parseJSON = goog.json.parse;
+GG.parseJSON = goog.json.parse;
 
 
 /**
@@ -417,7 +427,7 @@ G.parseJSON = goog.json.parse;
  *     invoked as a method of.
  * @suppress {deprecated} See above.
  */
-G.proxy = goog.bind;
+GG.proxy = goog.bind;
 
 
 /**
@@ -425,7 +435,7 @@ G.proxy = goog.bind;
  * @param {string} str The string to trim.
  * @return {string} A trimmed copy of {@code str}.
  */
-G.trim = goog.string.trim;
+GG.trim = goog.string.trim;
 
 
 /**
@@ -444,14 +454,14 @@ G.trim = goog.string.trim;
  *     instead of performing the removal inplace.  If specified, the original
  *     array will remain unchanged.
  */
-G.unique = goog.array.removeDuplicates;
+GG.unique = goog.array.removeDuplicates;
 
 
 /**
  * Null function used for default values of callbacks, etc.
  * @return {void} Nothing.
  */
-G.noop = goog.nullFunction;
+GG.noop = goog.nullFunction;
 
 
 // Array Functions
@@ -524,7 +534,7 @@ G.prototype.filter = function(fn, opt_handler, opt_not) {
   // filters based on handler and whether opt_not is used
   return G(goog.array.filter(/** @type {goog.array.ArrayLike} */(this),
       function(el, ind) {
-        return opt_not != Boolean(goog.bind(
+        return Boolean(opt_not) != Boolean(goog.bind(
             /** @type {Function} */(fn), opt_handler || this)(el, ind));
       }));
 };
@@ -718,7 +728,7 @@ G.prototype.index = function(opt_selector) {
   return goog.array.findIndex(this.toArray(), function(el) {
     if (opt_selector.nodeType)
       return el == opt_selector;
-    return G.matches(el, /** @type {Function|string} */(opt_selector));
+    return GG.matches(el, /** @type {Function|string} */(opt_selector));
   });
 };
 
@@ -745,7 +755,7 @@ G.prototype.height = function(opt_input) {
 G.prototype.find = function(selector) {
   var ret = [];
   this.each(function(el) {
-    goog.array.forEach(G.elsBySelector(selector, el) || [],
+    goog.array.forEach(GG.elsBySelector(selector, el) || [],
         function(ele) {
           goog.array.insert(ret, ele);
         }
@@ -882,10 +892,10 @@ G.prototype.children = function(opt_selector) {
   this.each(function(el) {
     arr = goog.array.concat(arr, [].slice.call(goog.dom.getChildren(el)));
   });
-  G.unique(arr);
+  GG.unique(arr);
   if (goog.isDef(opt_selector))
     return G(arr).filter(function(el) {
-      return G.matches(el, opt_selector);
+      return GG.matches(el, opt_selector);
     });
   return G(arr);
 };
@@ -899,7 +909,7 @@ G.prototype.children = function(opt_selector) {
  */
 G.prototype.detach = function(opt_selector) {
   this.filter(function(el) {
-    return G.matches(el, opt_selector);
+    return GG.matches(el, opt_selector);
   }).each(function(el) {
     goog.dom.removeNode(el);
   });
@@ -954,7 +964,7 @@ G.prototype.has = function(opt_selector) {
     });
   }
   return this.filter(function(el) {
-    return G.matches(el, /** @type {string} */(opt_selector));
+    return GG.matches(el, /** @type {string} */(opt_selector));
   });
 };
 
@@ -977,7 +987,7 @@ G.prototype.append = function(var_args) {
   if (goog.isArrayLike(args[0]))
     args = args[0];
   this.each(function(el) {
-    goog.dom.append.apply(this, G.merge([el], args));
+    goog.dom.append.apply(this, GG.merge([el], args));
   });
   return this;
 };
@@ -1068,7 +1078,7 @@ G.prototype.text = function(opt_input) {
  * this.getHandler().
  * @return {Array.<number>} uids you can pass to G.off.
  */
-G.prototype.on = function(eventType, selector, opt_data, opt_fn, 
+G.prototype.on = function(eventType, selector, opt_data, opt_fn,
     opt_handler, opt_eventObject) {
 
   // fix how the data is passed in
@@ -1093,7 +1103,7 @@ G.prototype.on = function(eventType, selector, opt_data, opt_fn,
       e.data = opt_data;
     }
     if (goog.isString(selector) &&
-        (!e.target.nodeType || !G.matches(e.target, selector))) {
+        (!e.target.nodeType || !GG.matches(e.target, selector))) {
       return;
     }
     goog.bind(/** @type {Function} */(opt_fn), this)(e);
@@ -1101,7 +1111,7 @@ G.prototype.on = function(eventType, selector, opt_data, opt_fn,
   listener.fn = opt_fn;
   // put data on e and check against selector whether to run
   return this.map(function(el) {
-    if(opt_eventObject) {
+    if (opt_eventObject) {
       return opt_eventObject.listen(el, eventType, listener,
           false, (opt_handler || el));
     }
@@ -1151,24 +1161,21 @@ G.prototype.off = function(eventType, fn, opt_handler, opt_eventObject) {
 /**
  * same as goog.events.listen
  */
-G.on = goog.events.listen;
+GG.on = goog.events.listen;
 
 
 /**
  * you can use this with the values from .on() to turn off events
  *
  * @param {Array.<number>|number} keys of listers to turn off.
- * @param {goog.events.EventHandler=} opt_eventObject to use.
  * @return {boolean} whether any listeners were turned off.
  */
-G.off = function(keys, opt_eventObject) {
-  var rem = function(key) {
-    return goog.events.unlistenByKey(key);
-  };
-  if (goog.isArray(keys)) {
-    return goog.array.some(keys, rem);
-  }
-  return rem(keys);
+GG.off = function(keys) {
+  var removed = false;
+  G(keys).each(function(key) {
+    removed = goog.events.unlistenByKey(key) || removed;
+  });
+  return removed;
 };
 
 
@@ -1222,7 +1229,7 @@ G.prototype.change = function(fn, opt_handler, opt_eventObject) {
 /**
  * @param {Function} fn function to apply.
  * @param {Object=} opt_handler to bind 'this' to.
- * @param {goog.events.EventHandler=} opt_eventObject the event handler to 
+ * @param {goog.events.EventHandler=} opt_eventObject the event handler to
  * use defaults to goog.events.
  * @return {Array.<number>} uids you can pass to G.off.
  */

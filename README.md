@@ -32,74 +32,74 @@ You can also add in some css filters by putting :filter at the end of the string
 
 ## Utilities ##
 
-### G.elsBySelector(selector, context): Array ###
+### GG.elsBySelector(selector, context): Array ###
 
 will return an array of elements matching the selector underneath the optional context element
 
-### G.matches(element, selector): boolean ###
+### GG.matches(element, selector): boolean ###
 
 returns whether an element matches a selector string or function that returns a boolean
 
-### G.extend(object, ...objects): object ###
+### GG.extend(object, ...objects): object ###
 
 extends the first object with the objects given and return that object
 
-### G.contains(container, child): boolean ###
+### GG.contains(container, child): boolean ###
 
 whether the container element holds the child element in it's tree
 
-### G.data(Element, key): string ###
+### GG.data(Element, key): string ###
 
 the data that was saved on the element
 
-### G.data(Element, key, value): G ###
+### GG.data(Element, key, value): G ###
 
 sets the data for an element and returns the element in a G object
 
-### G.each(collection, callback): G ###
+### GG.each(collection, callback): G ###
 
 runs the callback function taking the element and the index on each element in the collection, returning the collection in a G object
 
-### G.grep(array, filter, opt_invert): array ###
+### GG.grep(array, filter, opt_invert): array ###
 
 filters an array based on the filter function. You can optionally invert the results
 
-### G.inArray(value, array, opt_index): number ###
+### GG.inArray(value, array, opt_index): number ###
 
 returns the index of a value in the array optionally searching from an index
 
-### G.map(array, callback): array ###
+### GG.map(array, callback): array ###
 
 returns an array where the values are transformed by a function that takes in the element and the index and returns the new value
 
-### G.param(object): string ###
+### GG.param(object): string ###
 
 changes an object in to a parameter string where arrays are broken out:
 a = [1,2] -> a=1&a=2
 and objects are recursively given square brackets
 a = {a:1, b:2} -> a[a]=1&a[b]=2
 
-### G.merge(array, array): array ###
+### GG.merge(array, array): array ###
 
 merge two arrays together
 
-### G.parseJSON(string): object ###
+### GG.parseJSON(string): object ###
 
 convert a json string to an object
 
-### G.proxy(function, this): function ###
+### GG.proxy(function, this): function ###
 
 binds 'this' to the given object for a function
 
-### G.trim(string): string ###
+### GG.trim(string): string ###
 
 trims whitespace from a string
 
-### G.unique(array): array ###
+### GG.unique(array): array ###
 
 removes duplicates from an array
 
-### G.noop() ###
+### GG.noop() ###
 
 a blank function
 
@@ -129,7 +129,7 @@ returns the inverse of filter
 
 ### .map(function, opt_handler): G ###
 
-the function can take three arguments, the value, the index and the array and should return a value that will replace the existing value. An optional handler can be passed in to act as this. a new G object containing only the values returning true will be returned 
+the function can take three arguments, the value, the index and the array and should return a value that will replace the existing value. An optional handler can be passed in to act as this. a new G object containing only the values returning true will be returned
 
 ### .get(index): object ###
 
@@ -384,6 +384,8 @@ the same as bind but the eventType is set to click for you
 - small enhancements in code
 - on now mimics JQuery's latest (see signature above) and code comments
 - can use - for first selector character instead of .
+- util functions moved to GG
+- can use $ or $$ instead of G or GG (not safe, overwrites $ and $$)
 
 ### v0.5 ###
 

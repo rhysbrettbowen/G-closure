@@ -63,9 +63,11 @@ G = function(input, opt_mod) {
   return /** @type {G} */(new G.init(/** @type {{length: number}} */(input)));
 };
 
-
+// remove this line if you don't want to use $
 $ = G;
+
 GG = {};
+// remove this line if you don't want to use $$
 $$ = GG;
 
 

@@ -55,7 +55,10 @@ G = function(input, opt_mod) {
   }
 
   // if it's not an array then make it one
-  if (!goog.isArrayLike(input)) {
+  if (typeof input === 'object' && 'setInterval' in input) {
+    input = [input];
+  }
+  else if (!goog.isArrayLike(input)) {
     input = [input];
   }
 

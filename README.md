@@ -44,6 +44,15 @@ returns whether an element matches a selector string or function that returns a 
 
 extends the first object with the objects given and return that object
 
+### GG.wait(function, millisecond, opt_handler): id ###
+
+wait milliseconds before running the function with the optional handler,
+return id for use with GG.clearWait
+
+### GG.clearWait(id) ###
+
+clear the function to be run
+
 ### GG.contains(container, child): boolean ###
 
 whether the container element holds the child element in it's tree

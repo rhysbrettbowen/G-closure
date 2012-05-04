@@ -8,6 +8,7 @@ goog.provide('$$');
 goog.provide('G');
 goog.provide('GG');
 
+goog.require('goog.Timer');
 goog.require('goog.array');
 goog.require('goog.dom');
 goog.require('goog.events');
@@ -294,6 +295,29 @@ GG.grep = function(array, fn, opt_invert) {
     };
   return goog.array.filter(array, func);
 };
+
+
+/**
+ * Calls the given function once, after the optional pause.
+ *
+ * The function is always called asynchronously, even if the delay is 0. This
+ * is a common trick to schedule a function to run after a batch of browser
+ * event processing.
+ *
+ * @param {Function} listener Function or object that has a handleEvent method.
+ * @param {number=} opt_delay Milliseconds to wait; default is 0.
+ * @param {Object=} opt_handler Object in whose scope to call the listener.
+ * @return {number} A handle to the timer ID.
+ */
+ GG.wait = goog.Timer.callOnce;
+
+
+/**
+ * Clears a timeout initiated by callOnce
+ *
+ * @param {?number} timerId a timer ID.
+ */
+ GG.clearWait = goog.Timer.clear;
 
 
 /**

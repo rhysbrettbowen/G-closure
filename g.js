@@ -24,6 +24,8 @@ goog.require('goog.style');
  * @return {G} the G object.
  */
 G = function(input, opt_mod) {
+  if (!goog.isDefAndNotNull(input))
+    input = [];
 
   // already a G so return
   if (input.constructor == G)

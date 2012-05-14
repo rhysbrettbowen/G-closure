@@ -395,6 +395,7 @@ the same as bind but the eventType is set to click for you
 - can use - for first selector character instead of .
 - util functions moved to GG
 - can use $ or $$ instead of G or GG (not safe, overwrites $ and $$)
+- blur and focus are called using capture phase & IE uses focusin and focus out (see [quirksmode](http://www.quirksmode.org/blog/archives/2008/04/delegating_the.html))
 
 ### v0.5 ###
 

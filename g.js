@@ -1107,10 +1107,11 @@ G.prototype.text = function(opt_input) {
  * @param {goog.events.EventHandler=} opt_eventObject the event handler to use
  * defaults to goog.events, for goog.ui.component can pass in
  * this.getHandler().
+ * @param {boolean=} opt_capture should listen in the capture phase.
  * @return {Array.<number>} uids you can pass to G.off.
  */
 G.prototype.on = function(eventType, selector, opt_data, opt_fn,
-    opt_handler, opt_eventObject) {
+    opt_handler, opt_eventObject, opt_capture) {
 
   // fix how the data is passed in
   if (goog.isFunction(selector)) {
@@ -1144,10 +1145,10 @@ G.prototype.on = function(eventType, selector, opt_data, opt_fn,
   return this.map(function(el) {
     if (opt_eventObject) {
       return opt_eventObject.listen(el, eventType, listener,
-          false, (opt_handler || el));
+          !!opt_capture, (opt_handler || el));
     }
     return goog.events.listen(el, eventType, listener,
-        false, (opt_handler || el));
+        !!opt_capture, (opt_handler || el));
   }).toArray();
 };
 
@@ -1265,8 +1266,11 @@ G.prototype.change = function(fn, opt_handler, opt_eventObject) {
  * @return {Array.<number>} uids you can pass to G.off.
  */
 G.prototype.focus = function(fn, opt_handler, opt_eventObject) {
-  return this.on(goog.events.EventType.FOCUS, fn, opt_handler,
-      opt_eventObject);
+  return goog.userAgent.IE ?
+      this.on(goog.events.EventType.FOCUSIN, fn, opt_handler,
+          opt_eventObject) :
+      this.on(goog.events.EventType.FOCUS, fn, opt_handler,
+          opt_eventObject, true);
 };
 
 
@@ -1278,8 +1282,11 @@ G.prototype.focus = function(fn, opt_handler, opt_eventObject) {
  * @return {Array.<number>} uids you can pass to G.off.
  */
 G.prototype.blur = function(fn, opt_handler, opt_eventObject) {
-  return this.on(goog.events.EventType.BLUR, fn, opt_handler,
-      opt_eventObject);
+  return goog.userAgent.IE ?
+      this.on(goog.events.EventType.FOCUSOUT, fn, opt_handler,
+          opt_eventObject) :
+      this.on(goog.events.EventType.BLUR, fn, opt_handler,
+          opt_eventObject, true);
 };
 
 

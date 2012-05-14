@@ -1102,10 +1102,10 @@ G.prototype.text = function(opt_input) {
  * @param {Function|Object=} opt_data data to in event.data.
  * @param {Function|Object|goog.events.EventHandler=} opt_fn function to
  * apply.
- * @param {Object|goog.events.EventHandler=} opt_handler to bind 'this'
+ * @param {Object|goog.events.EventHandler|boolean=} opt_handler to bind 'this'
  * to will default to the element.
- * @param {goog.events.EventHandler=} opt_eventObject the event handler to use
- * defaults to goog.events, for goog.ui.component can pass in
+ * @param {goog.events.EventHandler|boolean=} opt_eventObject the event handler
+ * to use defaults to goog.events, for goog.ui.component can pass in
  * this.getHandler().
  * @param {boolean=} opt_capture should listen in the capture phase.
  * @return {Array.<number>} uids you can pass to G.off.
@@ -1115,12 +1115,14 @@ G.prototype.on = function(eventType, selector, opt_data, opt_fn,
 
   // fix how the data is passed in
   if (goog.isFunction(selector)) {
+    opt_capture = /** @type {boolean} */(opt_handler);
     opt_eventObject = /** @type {goog.events.EventHandler} */(opt_fn);
     opt_handler = opt_data;
     opt_fn = selector;
     selector = null;
     opt_data = undefined;
   } else if (goog.isFunction(opt_data)) {
+    opt_capture = /** @type {boolean} */(opt_eventObject);
     opt_handler = opt_fn;
     opt_fn = opt_data;
     opt_data = undefined;
@@ -1159,6 +1161,7 @@ G.prototype.on = function(eventType, selector, opt_data, opt_fn,
  * @param {Object=} opt_handler to bind 'this' to.
  * @param {goog.events.EventHandler=} opt_eventObject the event handler to use
  * defaults to goog.events.
+ * @param {boolean=} opt_capture should listen in the capture phase.
  * @return {Array.<number>} uids you can pass to G.off.
  */
 G.prototype.bind = G.prototype.on;

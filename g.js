@@ -336,6 +336,22 @@ GG.inArray = function(value, array, opt_index) {
 
 
 /**
+ * flattens arrays together - useful to get array from Gs
+ */
+GG.flatten = function (var_args) {
+  var result = [];
+  for (var i = 0; i < arguments.length; i++) {
+    var element = arguments[i];
+    if (goog.isArrayLike(element)) {
+      result.push.apply(result, GG.flatten.apply(null, element));
+    } else {
+      result.push(element);
+    }
+  }
+  return result;
+};
+
+/**
  * maps each element in the array or object to the output of a function
  *
  * @param {Array|Object} array to map.
@@ -867,10 +883,12 @@ G.prototype.removeNode = function() {
 
 
 /**
- * @param {Element|Node} node to replace first node with.
+ * @param {Element|Node|G} node to replace first node with.
  * @return {G} the G object with first node replaces.
  */
 G.prototype.replace = function(node) {
+  if(goog.isArrayLike(node))
+    node = node[0];
   goog.dom.replaceNode(node, this[0]);
   return G(node);
 };
@@ -1014,9 +1032,7 @@ G.prototype.hasClass = function(className) {
  * @return {G} the G object.
  */
 G.prototype.append = function(var_args) {
-  var args = arguments;
-  if (goog.isArrayLike(args[0]))
-    args = args[0];
+  var args = GG.flatten(arguments);
   this.each(function(el) {
     goog.dom.append.apply(this, GG.merge([el], args));
   });

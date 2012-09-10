@@ -42,7 +42,7 @@ G = function(input, opt_mod) {
 
   // a string is a selector
   else if (goog.isString(input)) {
-    if (input.charAt(0) == '<') {
+    if (goog.string.trimLeft(input.charAt(0)) == '<') {
       input = [goog.dom.htmlToDocumentFragment(input)];
     } else {
       input = GG.elsBySelector(input, opt_mod);

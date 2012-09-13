@@ -36,6 +36,9 @@ G = function(input, opt_mod) {
     opt_mod = GG.elsBySelector(/** @type {string} */(opt_mod))[0];
   }
 
+  if (input.constructor == DocumentFragment)
+    input = goog.array.clone(input.childNodes);
+
   // if it's an element then wrap it
   if (input.nodeType)
     input = [input];
@@ -43,7 +46,9 @@ G = function(input, opt_mod) {
   // a string is a selector
   else if (goog.isString(input)) {
     if (goog.string.trimLeft(input).charAt(0) == '<') {
-      input = [goog.dom.htmlToDocumentFragment(input)];
+      input = goog.dom.htmlToDocumentFragment(input);
+      if (input.constructor == DocumentFragment)
+        input = goog.array.clone(input.childNodes);
     } else {
       input = GG.elsBySelector(input, opt_mod);
     }

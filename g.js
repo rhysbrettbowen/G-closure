@@ -66,7 +66,8 @@ G = function(input, opt_mod) {
   }
 
   // G is actually G.init instantiated with an array
-  return /** @type {G} */(new G.init(/** @type {{length: number}} */(input)));
+  return /** @type {G} */(new G.init(
+      /** @type {{length: number}} */(input)));
 };
 
 // remove this line if you don't want to use $
@@ -1162,8 +1163,9 @@ G.prototype.on = function(eventType, selector, opt_data, opt_fn,
   // put data on e and check against selector whether to run
   return this.map(function(el) {
     if (opt_eventObject) {
-      return opt_eventObject.listen(el, eventType, listener,
+      var ret = opt_eventObject.listen(el, eventType, listener,
           !!opt_capture, (opt_handler || el));
+      return ret.keys_[ret.keys_.length - 1];
     }
     return goog.events.listen(el, eventType, listener,
         !!opt_capture, (opt_handler || el));
@@ -1218,12 +1220,12 @@ GG.on = goog.events.listen;
 /**
  * you can use this with the values from .on() to turn off events
  *
- * @param {Array.<number>|number} keys of listers to turn off.
+ * @param {Array|number} keys of listers to turn off.
  * @return {boolean} whether any listeners were turned off.
  */
 GG.off = function(keys) {
   var removed = false;
-  G(keys).each(function(key) {
+  G(GG.flatten(keys)).each(function(key) {
     removed = goog.events.unlistenByKey(key) || removed;
   });
   return removed;

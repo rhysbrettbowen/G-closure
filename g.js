@@ -1228,7 +1228,7 @@ G.prototype.text = function(opt_input) {
  * to use defaults to goog.events, for goog.ui.component can pass in
  * this.getHandler().
  * @param {boolean=} opt_capture should listen in the capture phase.
- * @return {Array.<number>} uids you can pass to G.off.
+ * @return {G} uids you can pass to G.off.
  */
 G.prototype.on = function(eventType, selector, opt_data, opt_fn,
     opt_handler, opt_eventObject, opt_capture) {
@@ -1272,7 +1272,7 @@ G.prototype.on = function(eventType, selector, opt_data, opt_fn,
     }
     return goog.events.listen(el, eventType, listener,
         !!opt_capture, (opt_handler || el));
-  }).toArray();
+  });
 };
 
 
@@ -1283,27 +1283,32 @@ G.prototype.on = function(eventType, selector, opt_data, opt_fn,
  * @param {goog.events.EventHandler=} opt_eventObject the event handler to use
  * defaults to goog.events.
  * @param {boolean=} opt_capture should listen in the capture phase.
- * @return {Array.<number>} uids you can pass to G.off.
+ * @return {G} uids you can pass to G.off.
  */
 G.prototype.bind = G.prototype.on;
 
 
 /**
- * @param {string} eventType the event name.
- * @param {Function} fn function to remove.
+ * @param {string=} opt_eventType the event name.
+ * @param {Function=} opt_fn function to remove.
  * @param {Object=} opt_handler 'this' was bound to.
  * @param {goog.events.EventHandler=} opt_eventObject the event handler to use
  * defaults to goog.events.
  * @return {G} the G object.
  */
-G.prototype.off = function(eventType, fn, opt_handler, opt_eventObject) {
+G.prototype.off = function(opt_eventType, opt_fn, opt_handler, opt_eventObject) {
+  if (!goog.isDef(opt_eventType)) {
+    GG.off(this);
+    return this;
+  }
   return this.each(function(el) {
-    var listenerArray = goog.events.getListeners_(el, eventType, false);
+    var listenerArray = goog.events.getListeners(
+        el, opt_eventType || '', false);
     if (!listenerArray) {
       return;
     }
     for (var i = 0; i < listenerArray.length; i++) {
-      if (listenerArray[i].listener.fn == fn &&
+      if (listenerArray[i].listener.fn == opt_fn &&
           listenerArray[i].capture === false &&
           listenerArray[i].handler == (opt_handler || el)) {
         return (opt_eventObject || goog.events)
@@ -1323,7 +1328,7 @@ GG.on = goog.events.listen;
 /**
  * you can use this with the values from .on() to turn off events
  *
- * @param {Array|number} keys of listers to turn off.
+ * @param {G|Array|number} keys of listers to turn off.
  * @return {boolean} whether any listeners were turned off.
  */
 GG.off = function(keys) {
@@ -1347,122 +1352,158 @@ G.prototype.unbind = G.prototype.off;
 
 
 /**
- * @param {Function} fn function to apply.
+ * @param {Function=} opt_fn function to apply.
  * @param {Object=} opt_handler to bind 'this' to.
  * @param {goog.events.EventHandler=} opt_eventObject the event handler to use
  * defaults to goog.events.
- * @return {Array.<number>|G} uids you can pass to G.off.
+ * @return {G} uids you can pass to G.off.
  */
-G.prototype.click = function(fn, opt_handler, opt_eventObject) {
-  if (!fn) {
-    return this.each(function(el) {
-      el.dispatchEvent(goog.events.EventType.CLICK);
-    });
+G.prototype.click = function(opt_fn, opt_handler, opt_eventObject) {
+  if (!opt_fn) {
+    this.trigger(goog.events.EventType.CLICK);
+    return this;
   }
-  return this.on(goog.events.EventType.CLICK, fn, opt_handler,
+  return this.on(goog.events.EventType.CLICK, opt_fn, opt_handler,
       opt_eventObject);
 };
 
 
 /**
- * @param {Function} fn function to apply.
+ * @param {Function=} opt_fn function to apply.
  * @param {Object=} opt_handler to bind 'this' to.
  * @param {goog.events.EventHandler=} opt_eventObject the event handler to use
  * defaults to goog.events.
- * @return {Array.<number>|G} uids you can pass to G.off.
+ * @return {G} uids you can pass to G.off.
  */
-G.prototype.change = function(fn, opt_handler, opt_eventObject) {
-  if (!fn) {
-    return this.each(function(el) {
-      el.dispatchEvent(goog.events.EventType.CHANGE);
-    });
+G.prototype.change = function(opt_fn, opt_handler, opt_eventObject) {
+  if (!opt_fn) {
+    this.trigger(goog.events.EventType.CHANGE);
+    return this;
   }
-  return this.on(goog.events.EventType.CHANGE, fn, opt_handler,
+  return this.on(goog.events.EventType.CHANGE, opt_fn, opt_handler,
       opt_eventObject);
 };
 
 
 /**
- * @param {Function} fn function to apply.
+ * @param {Function=} opt_fn function to apply.
  * @param {Object=} opt_handler to bind 'this' to.
  * @param {goog.events.EventHandler=} opt_eventObject the event handler to
  * use defaults to goog.events.
- * @return {Array.<number>} uids you can pass to G.off.
+ * @return {G} uids you can pass to G.off.
  */
-G.prototype.focus = function(fn, opt_handler, opt_eventObject) {
+G.prototype.focus = function(opt_fn, opt_handler, opt_eventObject) {
+  if(!opt_fn) {
+    this[0].focus();
+    return this;
+  }
   return goog.userAgent.IE ?
-      this.on(goog.events.EventType.FOCUSIN, fn, opt_handler,
+      this.on(goog.events.EventType.FOCUSIN, opt_fn, opt_handler,
           opt_eventObject) :
-      this.on(goog.events.EventType.FOCUS, fn, opt_handler,
+      this.on(goog.events.EventType.FOCUS, opt_fn, opt_handler,
           opt_eventObject, true);
 };
 
 
 /**
- * @param {Function} fn function to apply.
+ * @param {Function=} opt_fn function to apply.
  * @param {Object=} opt_handler to bind 'this' to.
  * @param {goog.events.EventHandler=} opt_eventObject the event handler to use
  * defaults to goog.events.
- * @return {Array.<number>} uids you can pass to G.off.
+ * @return {G} uids you can pass to G.off.
  */
-G.prototype.blur = function(fn, opt_handler, opt_eventObject) {
+G.prototype.blur = function(opt_fn, opt_handler, opt_eventObject) {
+  if(!opt_fn) {
+    this[0].blur();
+    return this;
+  }
   return goog.userAgent.IE ?
-      this.on(goog.events.EventType.FOCUSOUT, fn, opt_handler,
+      this.on(goog.events.EventType.FOCUSOUT, opt_fn, opt_handler,
           opt_eventObject) :
-      this.on(goog.events.EventType.BLUR, fn, opt_handler,
+      this.on(goog.events.EventType.BLUR, opt_fn, opt_handler,
           opt_eventObject, true);
 };
 
 
 /**
- * @param {Function} fn function to apply.
+ * @param {Function} opt_fn function to apply.
  * @param {Object=} opt_handler to bind 'this' to.
  * @param {goog.events.EventHandler=} opt_eventObject the event handler to use
  * defaults to goog.events.
- * @return {Array.<number>} uids you can pass to G.off.
+ * @return {G} uids you can pass to G.off.
  */
-G.prototype.mouseup = function(fn, opt_handler, opt_eventObject) {
-  return this.on(goog.events.EventType.MOUSEUP, fn, opt_handler,
+G.prototype.mouseup = function(opt_fn, opt_handler, opt_eventObject) {
+  if (!opt_fn) {
+    this.trigger(goog.events.EventType.MOUSEUP);
+    return this;
+  }
+  return this.on(goog.events.EventType.MOUSEUP, opt_fn, opt_handler,
       opt_eventObject);
 };
 
 
 /**
- * @param {Function} fn function to apply.
+ * @param {Function} opt_fn function to apply.
  * @param {Object=} opt_handler to bind 'this' to.
  * @param {goog.events.EventHandler=} opt_eventObject the event handler to use
  * defaults to goog.events.
- * @return {Array.<number>} uids you can pass to G.off.
+ * @return {G} uids you can pass to G.off.
  */
-G.prototype.mousedown = function(fn, opt_handler, opt_eventObject) {
-  return this.on(goog.events.EventType.MOUSEDOWN, fn, opt_handler,
+G.prototype.mousedown = function(opt_fn, opt_handler, opt_eventObject) {
+  if (!opt_fn) {
+    this.trigger(goog.events.EventType.MOUSEDOWN);
+    return this;
+  }
+  return this.on(goog.events.EventType.MOUSEDOWN, opt_fn, opt_handler,
       opt_eventObject);
 };
 
 
 /**
- * @param {Function} fn function to apply.
+ * @param {Function} opt_fn function to apply.
  * @param {Object=} opt_handler to bind 'this' to.
  * @param {goog.events.EventHandler=} opt_eventObject the event handler to use
  * defaults to goog.events.
- * @return {Array.<number>} uids you can pass to G.off.
+ * @return {G} uids you can pass to G.off.
  */
-G.prototype.mouseover = function(fn, opt_handler, opt_eventObject) {
-  return this.on(goog.events.EventType.MOUSEOVER, fn, opt_handler,
+G.prototype.mouseover = function(opt_fn, opt_handler, opt_eventObject) {
+  if (!opt_fn) {
+    this.trigger(goog.events.EventType.MOUSEOVER);
+    return this;
+  }
+  return this.on(goog.events.EventType.MOUSEOVER, opt_fn, opt_handler,
       opt_eventObject);
 };
 
 
 /**
- * @param {Function} fn function to apply.
+ * @param {Function} opt_fn function to apply.
  * @param {Object=} opt_handler to bind 'this' to.
  * @param {goog.events.EventHandler=} opt_eventObject the event handler to use
  * defaults to goog.events.
- * @return {Array.<number>} uids you can pass to G.off.
+ * @return {G} uids you can pass to G.off.
  */
-G.prototype.mouseout = function(fn, opt_handler, opt_eventObject) {
-  return this.on(goog.events.EventType.MOUSEOUT, fn, opt_handler,
+G.prototype.mouseout = function(opt_fn, opt_handler, opt_eventObject) {
+  if (!opt_fn) {
+    this.trigger(goog.events.EventType.MOUSEOUT);
+    return this;
+  }
+  return this.on(goog.events.EventType.MOUSEOUT, opt_fn, opt_handler,
       opt_eventObject);
 };
 
+
+/**
+ * @param {string} type of event to fire
+ * @param {Object=} opt_event the event object (you must init)
+ */
+G.prototype.trigger = function(type, opt_event) {
+  this.each(function(el) {
+    if(!opt_event) {
+      opt_event = document.createEvent('UIEvents');
+      opt_event.initUIEvent(type, true, true, window, 1);
+    }
+    el.dispatchEvent(opt_event);
+  })
+}
 

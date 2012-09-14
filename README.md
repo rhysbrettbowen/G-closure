@@ -394,14 +394,23 @@ removes an event registered with on, passes back it it was succesful
 
 alias for off
 
+### .trigger(type, opt_event): G ###
+
+dispatch the event (defaults to UIEvent) on all elements
+
 ### .click(function, handler, eventObject): uids ###
 
 the same as bind but the eventType is set to click for you
 
 ### other events you can call ###
 
+#### will call on element if there is no function passed ####
+
 - .focus()
 - .blur()
+
+#### will trigger when there is no function passed ####
+
 - .mouseup()
 - .mousedown()
 - .mouseover()

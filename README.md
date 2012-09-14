@@ -318,11 +318,28 @@ returns a G which is filtered based on the selector
 
 ### .append(input): G ###
 
-appends the input to all elements, can be a function, string or Node/NodeList
+appends the input to all elements, can be a function, string or Node/NodeList or G, will clone the input if there is more than one element
 
 ### .appendTo(input): G ###
 
 appends all the elements to the element which matches the input which can be a G, element, selector or function returning and element
+
+### .after(input): G ###
+
+inserts the input after the element which can be a function, string or Node/NodeList or G. If there is more than one element then the input is cloned
+
+### .insertAfter(input): G ###
+
+puts the elements after the input which can be a function, string or Node/NodeList or G
+
+### .before(input): G ###
+
+inserts the input before the element which can be a function, string or Node/NodeList or G. If there is more than one element then the input is cloned
+
+
+### .insertBefore(input): G ###
+
+puts the elements before the input which can be a function, string or Node/NodeList or G
 
 ### .clone(deep): G ###
 
@@ -335,6 +352,10 @@ return the innerHTML of the elements
 ### .html(string): G ###
 
 sets the innerHTML of the elements
+
+### .outerHTML(): string ###
+
+returns the outerHTML of all elements together
 
 ### .text(): G ###
 
@@ -387,6 +408,15 @@ the same as bind but the eventType is set to click for you
 - .mouseout()
 
 ## change log ##
+
+## v0.7 ##
+
+- new functions after/insertAfter/before/insertBefore/outerHTML
+- handles document fragments by getting their child nodes
+- uses document fragments to speed up append operations
+- will clone nodes when there are multiple elements to append to
+- if this.getHandler() to .on() is passed then get it's id
+- more functions can take a G object (including the constructor)
 
 ## v0.6 ###
 

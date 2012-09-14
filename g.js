@@ -29,14 +29,14 @@ G = function(input, opt_mod) {
 
   // already a G so return
   if (input.constructor == G)
-    return /** @type {G} */(input);
+    return /** @type {G} */(new G.init(input.toArray()));
 
   // if the mod is a string it's a selector
   if (goog.isString(opt_mod)) {
     opt_mod = GG.elsBySelector(/** @type {string} */(opt_mod))[0];
   }
 
-  if (input.constructor == DocumentFragment)
+  if (input.constructor == DocumentFragment && input.childNodes.length)
     input = goog.array.clone(input.childNodes);
 
   // if it's an element then wrap it
@@ -47,7 +47,7 @@ G = function(input, opt_mod) {
   else if (goog.isString(input)) {
     if (goog.string.trimLeft(input).charAt(0) == '<') {
       input = goog.dom.htmlToDocumentFragment(input);
-      if (input.constructor == DocumentFragment)
+      if (input.constructor == DocumentFragment && input.childNodes.length)
         input = goog.array.clone(input.childNodes);
     } else {
       input = GG.elsBySelector(input, opt_mod);
@@ -1038,10 +1038,16 @@ G.prototype.hasClass = function(className) {
  * @return {G} the G object.
  */
 G.prototype.append = function(var_args) {
-  var args = GG.flatten(arguments);
+  var args = G(GG.flatten(arguments));
   this.each(function(el) {
-    goog.dom.append.apply(this, GG.merge([el], args));
-  });
+    if(!args.size())
+      return this;
+    if(this.size() > 1)
+      args = args.clone(true);
+    var doc = document.createDocumentFragment();
+    goog.dom.append.apply(this, GG.merge([doc], args.toArray()));
+    goog.dom.append(el, doc);
+  }, this);
   return this;
 };
 
@@ -1052,10 +1058,79 @@ G.prototype.append = function(var_args) {
  */
 G.prototype.appendTo = function(input) {
   var append = G(input);
-  this.each(function(el) {goog.dom.append(/** @type {!Node} */(append[0]),
-        el);});
+  var doc = document.createDocumentFragment();
+  this.each(function(el) {
+    goog.dom.append(/** @type {!Node} */(doc), el);
+  });
+  goog.dom.append(/** @type {!Node} */(append[0]), doc);
   return this;
 };
+
+
+/**
+ * @param {G|string|Element|Node} input to put after the element.
+ * @return {G} the G object.
+ */
+G.prototype.after = function(input) {
+  if(!this.size())
+    return this;
+  input = G(input);
+  var doc = document.createDocumentFragment();
+  input.each(function(el) {
+    goog.dom.append(/** @type {!Node} */(doc), el);
+  });
+  if(this.size() == 1) {
+    goog.dom.insertSiblingAfter(doc, this[0]);
+  } else {
+    this.each(function(el) {
+      goog.dom.insertSiblingAfter(doc.cloneNode(true), el);
+    });
+  }
+  return this;
+}
+
+
+/**
+ * @param {G|string|Element|Node} input to put all elements after.
+ * @return {G} the G object.
+ */
+G.prototype.insertAfter = function(input) {
+  G(input).after(this);
+  return this;
+}
+
+
+/**
+ * @param {G|string|Element|Node} input to put before the element.
+ * @return {G} the G object.
+ */
+G.prototype.before = function(input) {
+  if(!this.size())
+    return this;
+  input = G(input);
+  var doc = document.createDocumentFragment();
+  input.each(function(el) {
+    goog.dom.append(/** @type {!Node} */(doc), el);
+  });
+  if(this.size() == 1) {
+    goog.dom.insertSiblingBefore(doc, this[0]);
+  } else {
+    this.each(function(el) {
+      goog.dom.insertSiblingBefore(doc.cloneNode(true), el);
+    });
+  }
+  return this;
+}
+
+
+/**
+ * @param {G|string|Element|Node} input to put all elements before.
+ * @return {G} the G object.
+ */
+G.prototype.insertBefore = function(input) {
+  G(input).before(this);
+  return this;
+}
 
 
 /**
@@ -1070,7 +1145,7 @@ G.prototype.clone = function(opt_deep) {
 
 
 /**
- * @param {goog.dom.Appendable|Function|string=} opt_input either a node that
+ * @param {G|goog.dom.Appendable|Function|string=} opt_input either a node that
  * will be appended, a function that returns appendable nodes or text to set
  * innerHTML.
  * @return {G|string} innerHTML if no arguments, G otherwise.
@@ -1085,10 +1160,33 @@ G.prototype.html = function(opt_input) {
     this.empty();
     this.each(function(el) {goog.dom.append(/** @type {!Node} */(el),
           opt_input.cloneNode);});
-  } else
+  } else if (goog.isString(opt_input)) {
     this.each(function(el) {el.innerHTML = opt_input;});
+  } else {
+    var html = $(opt_input).outerHTML();
+    this.each(function(el) {el.innerHTML = html;});
+  }
   return this;
 };
+
+
+/**
+ * gives the outerHTML for a node or list of nodes.
+ * @return {string} the outerHTML.
+ */
+G.prototype.outerHTML = function() {
+  var outerHTML = function(node) {
+    return node.outerHTML || (
+        function(n){
+          var div = document.createElement('div'), h;
+          div.appendChild(n.cloneNode(true));
+          h = div.innerHTML;
+          div = null;
+          return h;
+        })(node);
+  }
+  return this.map(outerHTML).toArray().join('');
+}
 
 
 /**

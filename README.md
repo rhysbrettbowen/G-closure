@@ -10,6 +10,8 @@ You can initialize a new G object by:
 G(selector)
 ```
 
+## Selectors ##
+
 the selector can either be an array, an element or a string. The string should be in one of the below forms and selects an array of elements:
 - "#elementId"
 - ".className"
@@ -29,6 +31,10 @@ You can also add in some css filters by putting :filter at the end of the string
 - last
 - even
 - odd
+
+You can now also change the selector engine. Just call GG.setSelectorEngine(engine). The engine should be a function that takes in a selector and an optional element to look under. Some valid engines include goog.dom.query and Sizzle.
+
+You can also set the matches engines with GG.setMatchesEngine(engine) which should take an element and a selector string. A valid matches engine could be Sizzle.matchesSelector. The default matching engine may use getEls to match an element if there is no native matchesSelector function.
 
 ## Utilities ##
 
@@ -232,9 +238,13 @@ returns the index of the first element that matches a selector
 
 return a G with all the elements matching the selector under the current elements in G
 
-### .visible(boolean): G ###
+### .visible() : boolean ###
 
-pass true or false to set the visibility of all elements
+returns if it hasn't been set to invisible
+
+### .visible(on/off): G ###
+
+pass in a function that takes the element and returns a boolean, or a boolean
 
 ### .show(): G ###
 
@@ -292,21 +302,25 @@ return the previous sibling of the node
 
 returns a G with the children of the elements optionally filtering on a selector
 
+### .parent(): G ###
+
+returns a G or the unique parents
+
 ### .detach(selector): G ###
 
 removes elements that match the selector fromt he document
 
-### .addClass(string): G ###
+### .addClass(class): G ###
 
-adds class to all elements
+adds class to all elements taking string or function
 
-### .removeClass(string): G ###
+### .removeClass(class): G ###
 
-removes a class from all elements
+removes a class from all elements taking a string or function
 
 ### .toggleClass(string, on/off): G ###
 
-toggles the className, optionally pass a boolean for whether it should be toggled on or off
+toggles the className, optionally pass a function that returns a boolean given the element or a boolean
 
 ### .hasClass(string): G ###
 
@@ -336,7 +350,6 @@ puts the elements after the input which can be a function, string or Node/NodeLi
 
 inserts the input before the element which can be a function, string or Node/NodeList or G. If there is more than one element then the input is cloned
 
-
 ### .insertBefore(input): G ###
 
 puts the elements before the input which can be a function, string or Node/NodeList or G
@@ -349,9 +362,9 @@ returns a G with cloned nodes, can pass whether to do a deep copy
 
 return the innerHTML of the elements
 
-### .html(string): G ###
+### .html(html): G ###
 
-sets the innerHTML of the elements
+sets the innerHTML of the elements taking a string or function
 
 ### .outerHTML(): string ###
 
@@ -361,9 +374,9 @@ returns the outerHTML of all elements together
 
 gets the textContent of the elements
 
-### .text(string): G ###
+### .text(text): G ###
 
-sets the textContent of the elements
+sets the textContent of the elements taking a string or function
 
 ## Event functions ##
 
@@ -417,6 +430,12 @@ the same as bind but the eventType is set to click for you
 - .mouseout()
 
 ## change log ##
+
+## v0.8 ##
+
+- can now change the selector engine
+- visible, html, text, addClas, removeClass, toggleClass can take a function
+- added parent
 
 ## v0.7 ##
 

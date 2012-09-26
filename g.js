@@ -110,6 +110,34 @@ G.init.prototype = G.prototype;
 G.prototype.constructor = G;
 
 
+GG.selectorEngine_ = null;
+
+
+GG.matchesEngine_ = null;
+
+
+/**
+ * change the default selector engine.
+ * 
+ * @param {Function} engine should take two arguments, the string selector and
+ * optionally an element to look under and return an array of elements
+ */
+GG.setSelectorEngine = function(engine) {
+  GG.selectorEngine_ = engine;
+};
+
+
+/**
+ * change the default selector engine.
+ * 
+ * @param {Function} engine should take two arguments, the element and the
+ * selector string and return a boolean for a match.
+ */
+GG.setMatchesEngine = function(engine) {
+  GG.selectorEngine_ = engine;
+};
+
+
 /**
  * css filters and their corresponding filter functions
  */
@@ -170,10 +198,13 @@ GG.cssFilters = {
  * @return {goog.array.ArrayLike} nodelist of found elements.
  */
 GG.elsBySelector = function(input, opt_mod) {
-  var ret;
-  opt_mod = opt_mod || document;
   if (input.charAt(0) == '-')
     input = '.' + input.substring(1);
+
+  if(GG.selectorEngine_)
+    return GG.selectorEngine_(input, opt_mod);
+  var ret;
+  opt_mod = opt_mod || document;
   // use native querySelectorAll if available
   if (opt_mod.querySelectorAll) {
     ret = opt_mod.querySelectorAll(input.indexOf(':') >= 0 ?
@@ -212,6 +243,11 @@ GG.elsBySelector = function(input, opt_mod) {
  * @return {boolean} if the element matches the selector.
  */
 GG.matches = function(element, opt_selector) {
+  if (opt_selector && opt_selector.charAt(0) == '-')
+    opt_selector = '.' + opt_selector.substring(1);
+
+  if (GG.matchesEngine_)
+    return GG.matchesEngine_(element, opt_selector);
 
   // handle where opt selector is function or not defined
   if (!goog.isDef(opt_selector))
@@ -219,8 +255,7 @@ GG.matches = function(element, opt_selector) {
   if (goog.isFunction(opt_selector)) {
     return opt_selector(element);
   }
-  if (opt_selector.charAt(0) == '-')
-    opt_selector = '.' + opt_selector.substring(1);
+
   // use native MatechesSelector where available
   var matchesSelector = element['webkitMatchesSelector'] ||
       element['mozMatchesSelector'] ||
@@ -990,20 +1025,30 @@ G.prototype.detach = function(opt_selector) {
 
 
 /**
- * @param {string} className to add to all elements.
+ * @param {Function|string} className to add to all elements.
  * @return {G} the G object.
  */
 G.prototype.addClass = function(className) {
-  return this.each(function(el) {goog.dom.classes.add(el, className);});
+  if (goog.isString(className)) {
+    var str = className;
+    className = function() {return str;};
+  }
+  var fn = /** @type {Function} */(className);
+  return this.each(function(el) {goog.dom.classes.add(el, fn(el));});
 };
 
 
 /**
- * @param {string} className to remove from all elements.
+ * @param {Function|string} className to remove from all elements.
  * @return {G} the G object.
  */
 G.prototype.removeClass = function(className) {
-  return this.each(function(el) {goog.dom.classes.remove(el, className);});
+  if (goog.isString(className)) {
+    var str = className;
+    className = function() {return str;};
+  }
+  var fn = /** @type {Function} */(className);
+  return this.each(function(el) {goog.dom.classes.remove(el, fn(el));});
 };
 
 
@@ -1212,7 +1257,7 @@ G.prototype.outerHTML = function() {
 
 
 /**
- * @param {Element|Node|Function|string=} opt_input element to copy text of or
+ * @param {Function|string=} opt_input element to copy text of or
  * text to change to or function that is passed the element and returns the
  * text.
  * @return {G|string} the text if no argument is given otherwise G.
@@ -1220,12 +1265,12 @@ G.prototype.outerHTML = function() {
 G.prototype.text = function(opt_input) {
   if (!goog.isDef(opt_input))
     return goog.dom.getRawTextContent(/** @type {Node} */(this.get(0)));
-  if (goog.isFunction(opt_input))
-    this.each(opt_input);
-  else
-    this.each(function(el) {goog.dom.setTextContent(el,
-        /** @type {string} */(opt_input));});
-  return this;
+  if (goog.isString(opt_input)) {
+    var str = opt_input;
+    opt_input = function() {return str;};
+  }
+  var fn = /** @type {Function} */(opt_input);
+  return this.each(function(el) {goog.dom.setTextContent(el, fn(el));});
 };
 
 

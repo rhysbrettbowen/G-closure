@@ -819,13 +819,18 @@ G.prototype.find = function(selector) {
 
 
 /**
- * @param {boolean=} opt_bool to change elements visible status.
+ * @param {Function|boolean=} opt_bool to change elements visible status.
  * @return {G|boolean} if no boolean then whether the first item is visible.
  */
 G.prototype.visible = function(opt_bool) {
   if (!goog.isDef(opt_bool))
     return goog.style.isElementShown(this[0]);
-  return this.each(function(el) {goog.style.showElement(el, opt_bool);});
+  if(goog.isBoolean(opt_bool)) {
+    var bool = opt_bool;
+    opt_bool = function() {return bool;};
+  }
+  var show = /** @type {Function} */(opt_bool);
+  return this.each(function(el) {goog.style.showElement(el, show(el));});
 };
 
 
@@ -957,6 +962,18 @@ G.prototype.children = function(opt_selector) {
 
 
 /**
+ * returns the unique parent nodes
+ * 
+ * @return {G} the parents
+ */
+G.prototype.parent = function() {
+  var arr = this.map(function(el) {return el.parentNode}).toArray();
+  GG.unique(arr);
+  return G(GG.grep(arr, function(el) {return el;}));
+};
+
+
+/**
  * removes the node from the document
  *
  * @param {Function|string=} opt_selector to filter by.
@@ -992,13 +1009,18 @@ G.prototype.removeClass = function(className) {
 
 /**
  * @param {string} className the class to toggle.
- * @param {boolean=} opt_on if defined the toggles on or off.
+ * @param {Function|boolean=} opt_on if defined the toggles on or off.
  * @return {G} the G object.
  */
 G.prototype.toggleClass = function(className, opt_on) {
+  if (goog.isDef(opt_on) && !goog.isFunction(opt_on)) {
+    var on = opt_on;
+    opt_on = function(el) {return on;};
+  }
+  var enable = /** @type {Function} */(opt_on);
   return this.each(function(el) {
     if (goog.isDef(opt_on)) {
-      goog.dom.classes.enable(el, className, opt_on);
+      goog.dom.classes.enable(el, className, enable(el));
     } else {
       goog.dom.classes.toggle(el, className);
     }

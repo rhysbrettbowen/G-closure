@@ -36,7 +36,8 @@ G = function(input, opt_mod) {
     opt_mod = GG.elsBySelector(/** @type {string} */(opt_mod))[0];
   }
 
-  if (input.constructor == DocumentFragment && input.childNodes.length)
+  if (input.constructor == document.createDocumentFragment().constructor &&
+      input.childNodes.length)
     input = goog.array.clone(input.childNodes);
 
   // if it's an element then wrap it
@@ -47,8 +48,11 @@ G = function(input, opt_mod) {
   else if (goog.isString(input)) {
     if (goog.string.trimLeft(input).charAt(0) == '<') {
       input = goog.dom.htmlToDocumentFragment(input);
-      if (input.constructor == DocumentFragment && input.childNodes.length)
+      if (input.constructor == document.createDocumentFragment().constructor &&
+          input.childNodes.length)
         input = goog.array.clone(input.childNodes);
+      else
+        input = [input];
     } else {
       input = GG.elsBySelector(input, opt_mod);
     }
@@ -1105,7 +1109,7 @@ G.prototype.hasClass = function(className) {
  * @return {G} the G object.
  */
 G.prototype.append = function(var_args) {
-  var args = G(GG.flatten(arguments));
+  var args = G(arguments);
   this.each(function(el) {
     if(!args.size())
       return this;
@@ -1265,7 +1269,7 @@ G.prototype.outerHTML = function() {
 G.prototype.text = function(opt_input) {
   if (!goog.isDef(opt_input))
     return goog.dom.getRawTextContent(/** @type {Node} */(this.get(0)));
-  if (goog.isString(opt_input)) {
+  if (!goog.isFunction(opt_input)) {
     var str = opt_input;
     opt_input = function() {return str;};
   }

@@ -758,8 +758,12 @@ G.prototype.remove = function(arr) {
  * @return {G|string} computed style if no val given.
  */
 G.prototype.css = function(style, opt_val) {
-  if (goog.isString(style) && !goog.isDef(opt_val))
+  if (goog.isString(style) && !goog.isDef(opt_val)) {
+    if (goog.userAgent.IE)
+      return this[0].currentStyle &&
+          this[0].currentStyle[goog.string.toCamelCase(style)];
     return goog.style.getComputedStyle(this[0], style);
+  }
   this.each(function(el) {
     goog.style.setStyle(el, style, opt_val);
   });
@@ -833,7 +837,9 @@ G.prototype.height = function(opt_input) {
   if (goog.isDef(opt_input)) {
     if (goog.isNumber(opt_input))
       opt_input += 'px';
-    this.each(function(el) {el.style.height = opt_input;});
+    this.each(function(el) {
+      el.style.height = opt_input;
+    });
     return this;
   }
   return goog.style.getBounds(/** @type {Element} */(this.get(0))).height;

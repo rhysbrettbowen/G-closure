@@ -105,7 +105,7 @@ G.init = function(input) {
   this.length = input.length;
   return this;
 };
-G.init.prototype = G.prototype;
+GG.fn = G.init.prototype = G.prototype;
 
 
 /**

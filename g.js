@@ -787,6 +787,35 @@ G.prototype.top = function(opt_input) {
 
 
 /**
+ * the coords of the first element to the page.
+ *
+ * @return {goog.math.Rect} the top, left, width and height
+ */
+G.prototype.position = function() {
+  return goog.style.getBounds(this[0]);
+};
+
+
+/**
+ * the offset from the offset parent or a passed in element
+ *
+ * @param {G|Element=} opt_input the element to get the offset from.
+ * @return {{top: number, left: number}} coordinates top & left
+ */
+G.prototype.offset = function(opt_input) {
+  var ans;
+  if (!opt_input)
+    ans = goog.style.getPosition(this[0]);
+  else
+    ans = goog.style.getRelativePosition(this[0], G(opt_input)[0]);
+  return {
+    top: ans.y,
+    left: ans.x
+  };
+};
+
+
+/**
  * @param {number|string=} opt_input number of pixels or css string.
  * @return {G|number} number of pixels if no input.
  */

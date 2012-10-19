@@ -1121,7 +1121,7 @@ G.prototype.has = function(opt_selector) {
     return this;
   if (opt_selector.nodeType) {
     return this.filter(function(el) {
-      return goog.dom.contains(/** @type {Node} */(opt_selector), el);
+      return goog.dom.contains(el,/** @type {Node} */(opt_selector));
     });
   }
   return this.filter(function(el) {
@@ -1265,7 +1265,7 @@ G.prototype.html = function(opt_input) {
   if (opt_input.nodeType) {
     this.empty();
     this.each(function(el) {goog.dom.append(/** @type {!Node} */(el),
-          opt_input.cloneNode);});
+          opt_input.cloneNode(true));});
   } else if (goog.isString(opt_input)) {
     this.each(function(el) {el.innerHTML = opt_input;});
   } else {

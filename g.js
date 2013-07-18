@@ -122,7 +122,7 @@ GG.matchesEngine_ = null;
 
 /**
  * change the default selector engine.
- * 
+ *
  * @param {Function} engine should take two arguments, the string selector and
  * optionally an element to look under and return an array of elements
  */
@@ -132,13 +132,13 @@ GG.setSelectorEngine = function(engine) {
 
 
 /**
- * change the default selector engine.
- * 
+ * change the default matches engine.
+ *
  * @param {Function} engine should take two arguments, the element and the
  * selector string and return a boolean for a match.
  */
 GG.setMatchesEngine = function(engine) {
-  GG.selectorEngine_ = engine;
+  GG.matchesEngine_ = engine;
 };
 
 
@@ -1037,7 +1037,7 @@ G.prototype.children = function(opt_selector) {
 
 /**
  * returns the unique parent nodes
- * 
+ *
  * @return {G} the parents
  */
 G.prototype.parent = function() {

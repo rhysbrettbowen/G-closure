@@ -1,7 +1,10 @@
-//     (c) 2012 Rhys Brett-Bowen, Catch.com
-//     G-object may be freely distributed under the MIT license.
-//     For all details and documentation:
-//     https://github.com/rhysbrettbowen/G-closure
+/**
+ * @license
+ *     (c) 2012 Rhys Brett-Bowen, Catch.com
+ *     G-object may be freely distributed under the MIT license.
+ *     For all details and documentation:
+ *     https://github.com/rhysbrettbowen/G-closure
+ */
 
 goog.provide('$');
 goog.provide('$$');
